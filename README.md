@@ -1,6 +1,6 @@
 # VIRENS
 
-**Verdant Inquiry Research Environment for Scholars**
+**Verdant Inquiry REsearch Notes System**
 
 An open-source academic research workflow system for humanities scholars.
 
@@ -176,7 +176,7 @@ If you use VIRENS in your research, please cite:
 ```bibtex
 @software{virens2025,
   author = {[Your Name]},
-  title = {VIRENS: Verdant Inquiry Research Environment for Scholars},
+  title = {VIRENS: Verdant Inquiry REsearch Notes System},
   year = {2025},
   url = {https://github.com/preterite/virens},
   version = {1.0.0}

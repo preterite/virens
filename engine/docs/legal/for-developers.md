@@ -1,5 +1,5 @@
 ---
-title: VIRENS License Guide for Developers
+title: "VIRENS License Guide for Developers"
 license: CC-BY-SA-4.0
 copyright: © 2025 Mike Edwards
 framework/docs/legal/for-developers.md
