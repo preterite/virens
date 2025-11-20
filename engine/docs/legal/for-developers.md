@@ -1,7 +1,7 @@
 ---
 title: "VIRENS License Guide for Developers"
 license: CC-BY-SA-4.0
-copyright: © 2025 Mike Edwards
+copyright: "(c) 2025 Mike Edwards
 framework/docs/legal/for-developers.md
 ---
 
@@ -140,7 +140,7 @@ Key points for developers:
 ---
 title: Your Document Title
 license: CC-BY-SA-4.0
-copyright: © 2025 Mike Edwards and contributors
+copyright: "(c) 2025 Mike Edwards and contributors
 ---
 ```
 

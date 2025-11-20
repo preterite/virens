@@ -1,7 +1,7 @@
 ---
 title: VIRENS License Guide for Consultants
 license: CC-BY-SA-4.0
-copyright: © 2025 Mike Edwards
+copyright: "(c) 2025 Mike Edwards
 framework/docs/legal/for-consultants.md
 ---
 
