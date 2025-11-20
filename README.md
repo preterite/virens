@@ -175,7 +175,7 @@ By contributing, you agree that your contributions will be licensed under:
 If you use VIRENS in your research, please cite:
 ```bibtex
 @software{virens2025,
-  author = {[Your Name]},
+  author = {[Mike Edwards},
   title = {VIRENS: Verdant Inquiry REsearch Notes System},
   year = {2025},
   url = {https://github.com/preterite/virens},
