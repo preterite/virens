@@ -1,0 +1,32 @@
+#!/usr/bin/env zsh
+# Start Observatory dashboard
+
+echo "═══════════════════════════════════════════════════════════"
+echo "          OBSERVATORY DASHBOARD"
+echo "═══════════════════════════════════════════════════════════"
+echo ""
+
+# Determine framework location
+if [ -f "$HOME/.virens" ]; then
+    USER_INSTANCE=$(cat "$HOME/.virens")
+    VIRENS_CONTAINER=$(dirname "$USER_INSTANCE")
+    FRAMEWORK_DIR="$VIRENS_CONTAINER/virens"
+else
+    FRAMEWORK_DIR="$HOME/Local/virens/virens"
+fi
+
+OBSERVATORY_DIR="$FRAMEWORK_DIR/engine/framework/modules/observatory"
+
+if [ ! -f "$OBSERVATORY_DIR/app.py" ]; then
+    echo "❌ Observatory module not found"
+    exit 1
+fi
+
+echo "Starting Observatory dashboard..."
+echo "Dashboard will be available at: http://localhost:8080"
+echo ""
+echo "Press Ctrl+C to stop"
+echo ""
+
+cd "$OBSERVATORY_DIR"
+python3 app.py

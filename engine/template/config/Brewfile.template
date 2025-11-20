@@ -1,0 +1,13 @@
+# User-Specific Applications
+# Copy to Brewfile and add your personal app preferences
+# These complement the core dependencies in engine/framework/config/Brewfile
+
+# Optional: GitHub CLI
+# brew "gh"
+
+# Optional: LaTeX (large download - 7GB)
+# cask "mactex-no-gui"
+
+# Add your preferred applications below:
+# brew "your-tool"
+# cask "your-application"

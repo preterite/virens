@@ -1,0 +1,14 @@
+# VIRENS User Configuration
+# Copy to user.yaml and fill in your information
+
+user:
+  name: "Your Name"
+  email: "you@institution.edu"
+  institution: "Your University"
+  department: "Your Department"
+  orcid: ""  # Optional ORCID identifier
+  
+preferences:
+  default_citation_style: "chicago-note-bibliography"
+  obsidian_daily_note_format: "YYYY-MM-DD"
+  observatory_update_frequency: "weekly"

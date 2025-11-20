@@ -1,0 +1,1154 @@
+# framework/config/apps.yaml
+# Complete application ecosystem for VIRENS
+# Generated: 2024-11-14
+# Revised: 2024-11-14
+
+metadata:
+  version: "1.1.0"
+  last_updated: "2024-11-14"
+  total_apps: 36
+  
+categories:
+  - research
+  - tasks
+  - automation
+  - capture
+  - discovery
+  - communication
+  - observatory
+  - health
+
+# ============================================================================
+# CORE APPLICATIONS
+# ============================================================================
+
+apps:
+
+  # ==========================================================================
+  # RESEARCH MODULE
+  # ==========================================================================
+
+  obsidian:
+    name: "Obsidian"
+    url: "https://obsidian.md"
+    platforms: ["macOS", "iOS"]
+    price: "$0 (free for personal use)"
+    optional_services:
+      sync: "$4-8/month"
+      publish: "$8/month per site"
+    category: "research"
+    module: "research/obsidian"
+    priority: "high"
+    description: >
+      Markdown-based knowledge management and note-taking system with powerful
+      linking capabilities. Serves as your thinking layer with backlinks, graph
+      view, and extensive plugin ecosystem for connecting ideas and building a
+      personal Zettelkasten. Works entirely with local files in human-readable
+      plain text format.
+    data_flow:
+      input: "Markdown files from Drafts actions, Readwise exports, Highlights annotations, manual writing, daily notes automation"
+      processing: "Bidirectional links between notes, daily notes with templates, literature notes from reading, permanent notes (Zettels), MOCs (Maps of Content) for project organization"
+      output: "Final manuscripts via Pandoc export, HTML/PDF via Obsidian Publish, citations to Bookends, project outlines exported to Scrivener, teaching materials"
+    integration_points:
+      - bookends: "Citation insertion via Citations plugin, temporary citations for scanning"
+      - devonthink: "Deep links to archived PDFs, indexed vault for AI search suggestions"
+      - drafts: "Quick capture actions create inbox notes, literature note templates"
+      - readwise: "Automated highlight imports with custom templates"
+      - highlights: "Annotation exports as literature notes"
+      - scrivener: "Export project drafts for long-form composition"
+      - pandoc: "Manuscript export to Word, LaTeX, HTML"
+    required_by:
+      - "research/obsidian"
+    learning_curve: "Low-medium (Markdown knowledge helpful)"
+    free_trial: "N/A (free forever for personal use)"
+
+  bookends:
+    name: "Bookends"
+    url: "https://www.sonnysoftware.com"
+    platforms: ["macOS", "iOS"]
+    price: "$59.99 (one-time)"
+    category: "research"
+    module: "research/bookends"
+    priority: "high"
+    description: >
+      Reference manager and citation tool designed specifically for macOS with
+      superior support for diverse source types. Excels at handling humanities
+      materials including archival sources, manuscripts, rare books, and non-standard
+      citations. Generates formatted bibliographies in any citation style.
+    data_flow:
+      input: "PDFs via drag-drop or watch folders, DOI/ISBN automatic lookups, manual entry for archival sources, BibTeX/RIS import, barcode scanning (iOS), Z39.50 library catalog searches"
+      processing: "Central bibliographic database with custom fields, automatic PDF attachment management, citekey generation (@author+year format), metadata extraction, duplicate detection, smart groups for organization"
+      output: "Formatted citations to Obsidian (temporary citation format), Scrivener integration, Word/Pages via scan function, BibTeX export for Pandoc, formatted bibliographies in any style (Chicago, MLA, APA, etc.), PDF annotations"
+    integration_points:
+      - obsidian: "Temporary citations {Author, Year #ID} for later scanning"
+      - scrivener: "Direct citation insertion and bibliography generation"
+      - devonthink: "Shared attachment folder (indexed, not duplicated)"
+      - hazel: "Automated PDF import and metadata extraction"
+      - alfred: "Quick search workflows for finding references"
+      - drafts: "Capture citations via iOS share sheet"
+    required_by:
+      - "research/bookends"
+    learning_curve: "Low (intuitive interface)"
+    free_trial: "30 days"
+
+  devonthink:
+    name: "DEVONthink Pro"
+    url: "https://www.devontechnologies.com/apps/devonthink"
+    platforms: ["macOS", "iOS"]
+    price: "$199 (Pro), $99 (Standard)"
+    category: "research"
+    module: "research/devonthink"
+    priority: "high"
+    description: >
+      Document management and archival system with AI-powered search, classification,
+      and discovery. Automatically OCRs PDFs, indexes all content, and suggests
+      unexpected connections via machine learning-based "See Also" feature.
+    data_flow:
+      input: "PDFs from Downloads folder via Hazel, web clippings via browser extension, scanned documents, email archives from EagleFiler, indexed Bookends attachment folder"
+      processing: "Automatic OCR of images and PDFs, full-text indexing, AI classification into groups, smart groups with complex queries, tagging and metadata, See Also suggestions based on content similarity"
+      output: "Full-text search results across entire archive, See Also connection suggestions to Obsidian notes, organized document library, x-devonthink-item:// deep links to other apps"
+    integration_points:
+      - bookends: "Indexes Bookends attachment folder (no duplication)"
+      - obsidian: "Deep links in notes, indexed vault for AI suggestions"
+      - hazel: "Automated import and OCR pipeline"
+      - hookmark: "Deep links to specific documents"
+      - drafts: "Quick filing via share sheet actions"
+    required_by:
+      - "research/devonthink"
+    learning_curve: "Medium (powerful but complex)"
+    free_trial: "150 hours of use"
+
+  scrivener:
+    name: "Scrivener 3"
+    url: "https://www.literatureandlatte.com/scrivener/"
+    platforms: ["macOS", "iOS", "Windows"]
+    price: "$49 (Mac), $19.99 (iOS)"
+    category: "research"
+    module: "research/scrivener"
+    priority: "high"
+    description: >
+      Long-form writing and manuscript organization tool. Bridges the gap between 
+      Obsidian's atomic notes and Pandoc's final output. Provides outlining, 
+      research organization, drafting, and compilation in an integrated environment 
+      for academic writing.
+    data_flow:
+      input: "Markdown files imported from Obsidian, research materials from DEVONthink, citations from Bookends, outline structures from MOCs"
+      processing: "Hierarchical manuscript organization with binder, corkboard and outline views, split-screen drafting with research materials, snapshots for version tracking, inline annotations and comments, scriptwriting and academic formatting templates"
+      output: "Compiled manuscripts to Pandoc (Markdown with citations), Word .docx for journal submission, PDF for distribution, ePub for digital publication, RTF for further editing"
+    integration_points:
+      - obsidian: "Imports Markdown notes and outlines"
+      - bookends: "Citation insertion and bibliography generation"
+      - devonthink: "References research materials"
+      - pandoc: "Exports for final formatting"
+    required_by:
+      - "research/scrivener"
+    learning_curve: "Medium (powerful but requires learning)"
+    free_trial: "30 days"
+
+  pandoc:
+    name: "Pandoc"
+    url: "https://pandoc.org"
+    platforms: ["macOS", "Linux", "Windows"]
+    price: "$0 (free, open source)"
+    category: "research"
+    module: "research/pandoc"
+    priority: "high"
+    description: >
+      Universal document converter supporting dozens of formats. Converts among
+      Markdown, Word, LaTeX, HTML, EPUB, and many others. Essential for academic
+      publishing workflows, enabling manuscript preparation in plain text with
+      export to journal-specific formats.
+    data_flow:
+      input: "Markdown manuscripts from Obsidian or Scrivener, BibTeX citation databases from Bookends, CSL style files for formatting"
+      processing: "Format conversion with customizable templates, citation processing via citeproc, reference list generation, cross-reference handling, figure and table processing"
+      output: "Word .docx for journal submission, LaTeX for publication, HTML for web, PDF via LaTeX, EPUB for distribution"
+    integration_points:
+      - obsidian: "Export Markdown manuscripts"
+      - scrivener: "Export compiled manuscripts"
+      - bookends: "BibTeX export for citations"
+      - latex: "Backend for PDF generation"
+    required_by:
+      - "research/pandoc"
+    learning_curve: "Medium (command-line tool)"
+    free_trial: "N/A (free forever)"
+
+  latex:
+    name: "LaTeX (MacTeX)"
+    url: "https://www.tug.org/mactex/"
+    platforms: ["macOS"]
+    price: "$0 (free, open source)"
+    category: "research"
+    module: "research/latex"
+    priority: "low"
+    description: >
+      Typesetting system for professional-quality academic documents. Used by
+      Pandoc for PDF generation and required by many academic publishers. Includes
+      comprehensive font libraries, mathematical typesetting, and bibliography
+      management. MacTeX is the complete macOS distribution.
+    data_flow:
+      input: "LaTeX source files from Pandoc conversion, BibTeX bibliographies, figure files (PDF, PNG)"
+      processing: "Document compilation, cross-reference resolution, bibliography generation, mathematical typesetting, figure placement"
+      output: "Print-quality PDF documents, publisher-ready submissions"
+    integration_points:
+      - pandoc: "Backend for PDF generation"
+      - bookends: "BibTeX bibliography support"
+    required_by:
+      - "research/latex"
+    learning_curve: "High (specialist tool)"
+    free_trial: "N/A (free forever)"
+
+  # ==========================================================================
+  # TASKS MODULE
+  # ==========================================================================
+
+  things:
+    name: "Things 3"
+    url: "https://culturedcode.com/things/"
+    platforms: ["macOS", "iOS", "iPadOS"]
+    price: "$49.99 (Mac), $9.99 (iPhone), $19.99 (iPad)"
+    category: "tasks"
+    module: "tasks/things"
+    priority: "high"
+    description: >
+      Task manager with intuitive design and powerful natural language input. 
+      Organizes tasks by projects, areas of responsibility, and contexts. Syncs 
+      reliably. Manages task workflows without the complexity overhead of 
+      omnibus project management tools.
+    data_flow:
+      input: "Tasks from Drafts actions, Shortcuts automations, manual entry with natural language parsing, email-to-Things forwarding, quick entry hotkey"
+      processing: "Project and area organization, scheduling (today/upcoming/someday), tagging by context, checklist subtasks, deadline tracking, notes and attachments"
+      output: "Daily agenda view, project progress tracking, completed task archive, focus mode integration, calendar time-blocking (if desired)"
+    integration_points:
+      - drafts: "Quick task capture via action templates"
+      - shortcuts: "Automated task creation from mobile"
+      - calendar: "Optional time-blocking integration"
+      - hookmark: "Deep links to tasks from other apps"
+      - obsidian: "Task tracking in project notes"
+    required_by:
+      - "tasks/things"
+    learning_curve: "Low (very intuitive)"
+    free_trial: "None (purchase required, but excellent reviews justify cost)"
+
+  # ==========================================================================
+  # AUTOMATION MODULE
+  # ==========================================================================
+
+  hazel:
+    name: "Hazel"
+    url: "https://www.noodlesoft.com"
+    platforms: ["macOS"]
+    price: "$42 (one-time)"
+    category: "automation"
+    module: "automation/hazel"
+    priority: "high"
+    description: >
+      Automated file organization and processing engine. Watches folders and
+      applies sophisticated rules based on file attributes, content, metadata,
+      and custom conditions. Moves, renames, tags, and processes files silently
+      in the background.
+    data_flow:
+      input: "Files in watched folders (Downloads, Desktop, project inbox folders, Bookends staging), PDF metadata, file attributes, custom matching rules"
+      processing: "Pattern matching on filename/content/metadata, extraction of DOI and bibliographic data, renaming with templates (Author+Year+Title), moving to destination folders, applying tags, triggering scripts, OCR processing"
+      output: "Organized files routed to Bookends attachments folder, PDFs imported to DEVONthink with metadata, archived emails to EagleFiler, cleaned desktop, processed downloads"
+    integration_points:
+      - bookends: "Auto-import PDFs with metadata extraction"
+      - devonthink: "File routing and OCR processing"
+      - keyboard-maestro: "Trigger macros from file events"
+      - obsidian: "Route annotation exports to vault folders"
+    required_by:
+      - "automation/hazel"
+    learning_curve: "Low-medium (rule building intuitive)"
+    free_trial: "14 days"
+
+  keyboard-maestro:
+    name: "Keyboard Maestro"
+    url: "https://www.keyboardmaestro.com"
+    platforms: ["macOS"]
+    price: "$36 (one-time)"
+    category: "automation"
+    module: "automation/keyboard-maestro"
+    priority: "high"
+    description: >
+      Macro automation powerhouse for macOS. Creates complex multi-step workflows
+      triggered by hotkeys, time-based schedules, application events, or custom
+      conditions. Handles window management, text manipulation, app orchestration,
+      web scraping, and API calls.
+    data_flow:
+      input: "Hotkey triggers, time-based triggers, application launch/quit events, clipboard content, selected text, typed strings, USB device connection"
+      processing: "Multi-step macro execution with conditionals and loops, window arrangement and focus management, text processing and transformation, app control via AppleScript/JavaScript, API calls and web automation, variable storage and manipulation"
+      output: "Automated research workflows, window layouts for different work modes, processed text to other applications, executed complex sequences, custom palettes for context-specific actions"
+    integration_points:
+      - obsidian: "Custom automation for vault operations"
+      - bookends: "Citation workflows and batch processing"
+      - devonthink: "Import automation and smart filing"
+      - things: "Task creation from selected text"
+      - drafts: "Complex routing and processing"
+      - hazel: "Triggered by file operations"
+    required_by:
+      - "automation/keyboard-maestro"
+    learning_curve: "Medium-high (very powerful, requires investment)"
+    free_trial: "30 days"
+
+  shortcuts:
+    name: "Shortcuts"
+    url: "https://support.apple.com/guide/shortcuts-mac/"
+    platforms: ["macOS", "iOS", "iPadOS"]
+    price: "$0 (free, built into macOS/iOS)"
+    category: "automation"
+    module: "automation/shortcuts"
+    priority: "high"
+    description: >
+      Apple's native automation platform for visual workflow building. Bridges
+      iOS and macOS seamlessly, enabling mobile capture workflows and cross-device
+      automation. Essential for mobile integration. Simpler than Keyboard Maestro 
+      but more accessible and cross-platform.
+    data_flow:
+      input: "Triggers from share sheet, home screen widgets, Siri voice commands, time-based automation, Focus mode changes, manual shortcut runs, NFC tags, location-based triggers"
+      processing: "Multi-step automation with conditionals and loops, API calls to web services, file operations across iCloud, text processing and parsing, data transformation, cross-app communication"
+      output: "Text routed to Drafts/Obsidian, files uploaded to iCloud folders, notifications and alerts, data stored in Data Jar, cross-device state synchronization"
+    integration_points:
+      - drafts: "Mobile capture to Mac workflow"
+      - obsidian: "Quick note creation and append actions"
+      - things: "Task creation from mobile"
+      - bookends: "ISBN scanning and reference creation"
+      - data-jar: "State and data storage across devices"
+    required_by:
+      - "automation/shortcuts"
+    learning_curve: "Low-medium (visual, but can get complex)"
+    free_trial: "N/A (free forever)"
+
+  typinator:
+    name: "Typinator"
+    url: "https://www.ergonis.com/products/typinator/"
+    platforms: ["macOS"]
+    price: "€24.99 (~$27 USD, one-time)"
+    category: "automation"
+    module: "automation/typinator"
+    priority: "high"
+    description: >
+      Scriptable text expander with advanced features including variables, interactive
+      input fields, and AppleScript integration. Goes beyond simple snippet expansion
+      to enable dynamic text automation with data pulled from other applications.
+      Can insert formatted citations, dates, file paths, clipboard content, and
+      custom computed values.
+    data_flow:
+      input: "Typed abbreviations, hotkey triggers, variables from system (date, time, clipboard), AppleScript queries to other apps (Bookends citations, file paths)"
+      processing: "Abbreviation expansion with variable substitution, interactive dialogs for user input, conditional text insertion, formatted text with styles, cursor positioning"
+      output: "Expanded text in any application, formatted citations from Bookends, dynamic templates with fill-in fields, automated text workflows"
+    integration_points:
+      - bookends: "Insert formatted citations via AppleScript"
+      - obsidian: "Note templates with dynamic content"
+      - drafts: "Complementary text automation"
+      - keyboard-maestro: "Triggered from macros"
+    required_by:
+      - "automation/typinator"
+    learning_curve: "Low-medium (simple for basic use, powerful for advanced)"
+    free_trial: "30 days"
+
+  data-jar:
+    name: "Data Jar"
+    url: "https://datajar.app"
+    platforms: ["macOS", "iOS"]
+    price: "$0 (free)"
+    category: "automation"
+    module: "automation/data-jar"
+    priority: "high"
+    description: >
+      Persistent data storage system for Shortcuts, enabling stateful automation
+      across devices. Stores variables, JSON data, and configuration that survives
+      between shortcut runs and syncs via iCloud. Critical infrastructure for
+      complex mobile-to-desktop workflows. Acts as data broker between
+      mobile capture apps and Mac repositories.
+    data_flow:
+      input: "Data written by Shortcuts on iOS or macOS, JSON objects, strings, numbers, lists, configuration dictionaries"
+      processing: "Persistent storage in iCloud-synced database, organized in hierarchical key-value structure, JSON parsing and manipulation, cross-device synchronization"
+      output: "Data retrieved by Shortcuts for routing decisions, last-used citekeys for citation workflows, project paths for file routing, machine state for Focus mode coordination, mobile-to-desktop handoff data"
+    integration_points:
+      - shortcuts: "Primary interface (read/write values)"
+      - bookends: "Store last citekey, project defaults"
+      - obsidian: "Store vault paths, last-opened notes"
+      - devonthink: "Store database UUIDs, group paths"
+      - drafts: "Store action state, routing preferences"
+    required_by:
+      - "automation/data-jar"
+    learning_curve: "Low (simple key-value store)"
+    free_trial: "N/A (free forever)"
+
+  hyperduck:
+    name: "Hyperduck"
+    url: "https://sindresorhus.com/hyperduck"
+    platforms: ["iOS", "macOS"]
+    price: "$0 (free)"
+    category: "automation"
+    module: "automation/hyperduck"
+    priority: "low"
+    description: >
+      URL scheme relay that sends URLs from iPhone to Mac for processing. Enables
+      mobile-triggered Mac automations and shortcuts without complex API setups.
+      The URL is received on Mac and can trigger Shortcuts, Keyboard Maestro macros,
+      or shell scripts. Simple but powerful for mobile-to-desktop handoff workflows.
+    data_flow:
+      input: "URLs sent from iOS Shortcuts, share sheet, or other apps via Hyperduck URL scheme"
+      processing: "URL received on paired Mac via iCloud relay, decoded and parsed"
+      output: "Triggers Mac Shortcuts, launches URLs in Mac apps, executes Keyboard Maestro macros, runs shell scripts with URL parameters"
+    integration_points:
+      - shortcuts: "Primary iOS sender, Mac receiver"
+      - keyboard-maestro: "Triggered by received URLs"
+      - obsidian: "Open specific notes on Mac from mobile"
+      - bookends: "Trigger reference searches on Mac"
+    required_by:
+      - "automation/hyperduck"
+    learning_curve: "Low (simple URL passing)"
+    free_trial: "N/A (free forever)"
+
+  # ==========================================================================
+  # CAPTURE MODULE
+  # ==========================================================================
+
+  drafts:
+    name: "Drafts"
+    url: "https://getdrafts.com"
+    platforms: ["macOS", "iOS", "iPadOS"]
+    price: "$0 (free), $19.99/year (Pro)"
+    category: "capture"
+    module: "capture/drafts"
+    priority: "high"
+    description: >
+      Universal capture tool for text. Fast-launching powerful action system to 
+      route text anywhere, URL schemes for automation, and extensive scripting 
+      capabilities. Universal inbox for fleeting thoughts, quotes from readings, 
+      voice transcripts, and quick notes that need processing and routing.
+    data_flow:
+      input: "Quick text entry via keyboard, voice dictation (built-in or Just Press Record), share sheet from Safari/Books/other apps, Tot dot content, URL scheme from other automations"
+      processing: "Action scripts route text by content type or manual selection, templates for different note types (literature notes, fleeting notes, tasks), text transformation and formatting, tagging and metadata"
+      output: "Literature notes to Obsidian with citations, tasks to Things with proper formatting, emails composed and sent, messages to colleagues, archived for later processing, appended to existing notes"
+    integration_points:
+      - obsidian: "Primary routing destination for notes"
+      - things: "Task creation with natural language"
+      - bookends: "Citation capture and formatting"
+      - shortcuts: "Triggered by iOS automations"
+      - just-press-record: "Voice transcription input"
+      - tot: "Transfers from scratchpad dots"
+    required_by:
+      - "capture/drafts"
+    learning_curve: "Low-medium (simple capture, powerful actions)"
+    free_trial: "N/A (free tier sufficient for basic use)"
+
+  highlights:
+    name: "Highlights"
+    url: "https://highlightsapp.net"
+    platforms: ["macOS", "iOS"]
+    price: "$0 (free for basic), $29.99 (Pro, one-time)"
+    category: "capture"
+    module: "capture/highlights"
+    priority: "high"
+    description: >
+      PDF annotation and highlight extraction tool with superior Markdown export
+      capabilities. Exports annotations as clean Markdown with page numbers,
+      citekey placeholders, and proper formatting. Better extraction quality than
+      most PDF readers, preserving structure and metadata. Essential for processing
+      PDF annotations into literature notes.
+    data_flow:
+      input: "PDFs opened from Bookends library or DEVONthink archive, reading and annotation with highlighting, underlining, comments, and notes"
+      processing: "Markup with various annotation tools, color-coded highlighting, marginal comments, text notes, bookmark creation"
+      output: "Markdown exports of annotations with preserved page numbers and citekey variables, cleaned and formatted for Obsidian literature notes, BibTeX citation metadata included"
+    integration_points:
+      - bookends: "Opens PDFs from citation library"
+      - devonthink: "Opens archived PDFs"
+      - obsidian: "Exports become literature notes"
+      - hazel: "Processed exports routed to vault"
+    required_by:
+      - "capture/highlights"
+    learning_curve: "Low (familiar PDF reader interface)"
+    free_trial: "N/A (free version functional)"
+
+  readwise:
+    name: "Readwise"
+    url: "https://readwise.io"
+    platforms: ["Web", "iOS", "macOS app coming"]
+    price: "$8.99/month or $89.99/year"
+    category: "capture"
+    module: "capture/readwise"
+    priority: "high"
+    description: >
+      Centralized highlight aggregation and sync service. Collects highlights from
+      Kindle, Apple Books, web articles (via browser extension), PDFs, and Reader
+      app. Exports to Obsidian with customizable templates and enables spaced
+      repetition review of highlights. Hub for all reading annotations across
+      devices and platforms.
+    data_flow:
+      input: "Highlights from Kindle sync, Apple Books export, web article highlights via browser extension, Readwise Reader app annotations, PDF highlights, Instapaper/Pocket imports"
+      processing: "Centralized highlight database, tagging and organization, spaced repetition review scheduling, template-based formatting for export, deduplication across sources"
+      output: "Daily/weekly Markdown exports to Obsidian with custom templates, literature note generation with metadata and page numbers, highlight review notifications"
+    integration_points:
+      - obsidian: "Primary export destination"
+      - kindle: "Automatic highlight sync"
+      - apple-books: "Highlight import"
+      - safari: "Web highlight capture"
+    required_by:
+      - "capture/readwise"
+    learning_curve: "Low (automatic sync)"
+    free_trial: "60 days"
+
+  just-press-record:
+    name: "Just Press Record"
+    url: "https://www.openplanetsoftware.com/just-press-record/"
+    platforms: ["iOS", "macOS", "Apple Watch"]
+    price: "$4.99 (iOS), $4.99 (Mac)"
+    category: "capture"
+    module: "capture/just-press-record"
+    priority: "high"
+    description: >
+      Voice recording with automatic transcription. One-tap recording from iPhone,
+      Apple Watch, or Mac with cloud sync. Transcriptions are accurate and editable.
+      Essential for capturing thoughts while walking, commuting, or when typing is
+      inconvenient. Integrates with Drafts for processing transcribed notes.
+    data_flow:
+      input: "Voice recording via one-tap interface, Apple Watch complication, iOS widget, or Mac menubar"
+      processing: "Audio recording with automatic cloud transcription, editable transcript with timestamps, audio file storage, iCloud sync across devices"
+      output: "Transcribed text to Tot scratchpad dots, shared to Drafts for processing and routing, audio files archived, text sent to Obsidian as fleeting notes"
+    integration_points:
+      - tot: "Direct output to dedicated scratchpad dot"
+      - drafts: "Transcribed text for processing"
+      - obsidian: "Fleeting notes from voice capture"
+      - shortcuts: "Automated routing workflows"
+    required_by:
+      - "capture/just-press-record"
+    learning_curve: "Very low (one-tap recording)"
+    free_trial: "None (low price point)"
+
+  tot:
+    name: "Tot"
+    url: "https://tot.rocks"
+    platforms: ["macOS", "iOS"]
+    price: "$19.99 (one-time, universal purchase)"
+    category: "capture"
+    module: "capture/tot"
+    priority: "low"
+    description: >
+      Seven-dot scratchpad system for ephemeral text. Each dot is a separate
+      temporary note space. Minimal, fast, and designed for quick text manipulation
+      before routing elsewhere. Used primarily on iPhone for mobile capture of
+      thoughts via text or voice (Just Press Record dedicated dot), with content
+      flowing into Drafts for permanent storage.
+    data_flow:
+      input: "Quick text typing, voice transcription from Just Press Record to dedicated dot, clipboard paste, drag-and-drop text"
+      processing: "Temporary storage in seven independent dots, basic formatting (plain text, RTF, Markdown), character count, iCloud sync across devices"
+      output: "Text copied/shared to Drafts for processing and routing, temporary notes that don't need permanent storage, quick editing before pasting elsewhere"
+    integration_points:
+      - just-press-record: "Receives transcribed voice notes"
+      - drafts: "Primary destination for permanent capture"
+      - shortcuts: "Automated reading and clearing of dots"
+    required_by:
+      - "capture/tot"
+    learning_curve: "Very low (extremely simple)"
+    free_trial: "None (reasonably priced)"
+
+  scanner-pro:
+    name: "Scanner Pro"
+    url: "https://readdle.com/scannerpro"
+    platforms: ["iOS"]
+    price: "$3.99/month or $19.99/year"
+    category: "capture"
+    module: "capture/scanner-pro"
+    priority: "low"
+    description: >
+      Mobile document scanning with OCR, perspective correction, and multi-page
+      support. Scans book pages, handwritten notes, whiteboards, and documents
+      with excellent quality. Superior to built-in Notes scanning with better
+      edge detection, automatic enhancement, and OCR capabilities. Essential for
+      library work and fieldwork.
+    data_flow:
+      input: "iPhone camera scanning of book pages, documents, notes, whiteboards, receipts, multi-page documents"
+      processing: "Automatic edge detection and cropping, perspective correction, contrast and brightness enhancement, OCR text extraction, multi-page PDF creation"
+      output: "Scanned PDFs shared to Bookends (via ISBN or manual entry), DEVONthink for archiving, Drafts for text extraction, iCloud Drive for storage"
+    integration_points:
+      - bookends: "ISBN scanning for reference creation"
+      - devonthink: "Document archiving"
+      - drafts: "Text extraction and processing"
+      - shortcuts: "Automated filing workflows"
+    required_by:
+      - "capture/scanner-pro"
+    learning_curve: "Very low (point and shoot)"
+    free_trial: "7 days"
+
+  # ==========================================================================
+  # DISCOVERY MODULE
+  # ==========================================================================
+
+  alfred:
+    name: "Alfred"
+    url: "https://www.alfredapp.com"
+    platforms: ["macOS"]
+    price: "$0 (free), £34 (~$43 USD, Powerpack one-time)"
+    category: "discovery"
+    module: "discovery/alfred"
+    priority: "high"
+    description: >
+      Launcher and workflow automation platform for macOS. Provides fast
+      search for files, apps, contacts, and custom workflows. Powerpack unlocks
+      workflow creation for Bookends citation searches, clipboard history management,
+      text expansion via snippets, and custom search integrations. More streamlined
+      than Spotlight for power users.
+    data_flow:
+      input: "Keyboard shortcut activation (typically Option+Space), typed queries for apps/files/contacts, workflow-specific keywords and hotkeys, clipboard history"
+      processing: "File and application indexing with relevance ranking, workflow execution with arguments, clipboard history with image support, snippet expansion, custom web searches"
+      output: "Launched applications, opened files, executed workflows (Bookends searches, citation insertion, custom scripts), pasted clipboard history items, expanded snippets"
+    integration_points:
+      - bookends: "Custom workflows for citation search and insertion"
+      - obsidian: "Quick note opening and search"
+      - devonthink: "Search and open documents"
+      - keyboard-maestro: "Triggered by Alfred workflows"
+    required_by:
+      - "discovery/alfred"
+    learning_curve: "Low (basic use), Medium (workflow creation)"
+    free_trial: "Free version available (Powerpack is upgrade)"
+
+  hookmark:
+    name: "Hookmark"
+    url: "https://hookproductivity.com"
+    platforms: ["macOS"]
+    price: "$0 (free for basic), $20/year or $80 lifetime (Pro)"
+    category: "discovery"
+    module: "discovery/hookmark"
+    priority: "high"
+    description: >
+      Creates and maintains bidirectional deep links between items across different
+      applications. Links a PDF in DEVONthink to its Obsidian literature note,
+      Bookends reference, and Things task, enabling instant navigation between
+      related items regardless of app boundaries. Essential for maintaining research
+      context and connections.
+    data_flow:
+      input: "Active item in any supported app (file, note, email, task, browser tab, calendar event), hook creation command via hotkey"
+      processing: "Generates app-specific deep links (x-devonthink-item://, obsidian://, bookends://, things://), maintains bidirectional link database, supports link naming and annotation"
+      output: "Quick navigation between linked items via hotkey (Command+Shift+space), contextual link menus in each app, Markdown link export for notes, link copying for sharing"
+    integration_points:
+      - obsidian: "Links to notes from PDFs and references"
+      - bookends: "Links to citations from notes and tasks"
+      - devonthink: "Links to archived documents"
+      - things: "Links to tasks from research items"
+      - mail: "Links to emails from project notes"
+    required_by:
+      - "discovery/hookmark"
+    learning_curve: "Low-medium (simple concept, needs practice)"
+    free_trial: "14 days for Pro features"
+
+  # ==========================================================================
+  # COMMUNICATION MODULE
+  # ==========================================================================
+
+  apple-mail:
+    name: "Apple Mail"
+    url: "https://www.apple.com/macos/mail/"
+    platforms: ["macOS", "iOS"]
+    price: "$0 (free, built into macOS/iOS)"
+    category: "communication"
+    module: "communication/mail"
+    priority: "high"
+    description: >
+      Native macOS email client with Exchange server support. Used as backend
+      for institutional email with automation for filing and archiving. Reliable 
+      Exchange integration with calendar and contacts sync.
+    data_flow:
+      input: "Institutional Exchange email (WSU), IMAP accounts, email forwarding from Things, compose via mailto: links"
+      processing: "Exchange ActiveSync for email/calendar/contacts, smart mailboxes for organization, rules for basic filtering, search across all accounts"
+      output: "Sent emails, emails filed to EagleFiler for long-term archiving, calendar events synced to Apple Calendar, contact updates synced to Apple Contacts"
+    integration_points:
+      - eaglefiler: "Archives emails for retrieval and tagging"
+      - apple-calendar: "Synced via Exchange"
+      - apple-contacts: "Synced via Exchange"
+      - hookmark: "Deep links to specific emails"
+      - things: "Email-to-Things forwarding"
+    required_by:
+      - "communication/mail"
+    learning_curve: "Very low (familiar interface)"
+    free_trial: "N/A (free forever)"
+
+  apple-calendar:
+    name: "Apple Calendar"
+    url: "https://www.apple.com/macos/calendar/"
+    platforms: ["macOS", "iOS"]
+    price: "$0 (free, built into macOS/iOS)"
+    category: "communication"
+    module: "communication/calendar"
+    priority: "high"
+    description: >
+      Native macOS calendar application with Exchange server support. Syncs
+      institutional calendars, provides time-blocking capabilities,
+      and integrates with Focus modes. Can be extended with BusyCal for enhanced
+      features while maintaining Exchange compatibility as backend.
+    data_flow:
+      input: "Exchange calendar events from institution, manual event creation, natural language event parsing, .ics file import, iCloud calendar sync"
+      processing: "Calendar display with multiple calendar support, event organization and categorization, time zone handling, travel time calculations, availability management"
+      output: "Event reminders and notifications, time-blocking schedules, Focus mode integration, calendar sharing, availability for scheduling"
+    integration_points:
+      - apple-mail: "Synced via Exchange"
+      - busycal: "Enhanced interface (optional)"
+      - things: "Calendar time-blocking integration"
+      - shortcuts: "Event creation automation"
+    required_by:
+      - "communication/calendar"
+    learning_curve: "Very low (familiar interface)"
+    free_trial: "N/A (free forever)"
+
+  apple-contacts:
+    name: "Apple Contacts"
+    url: "https://www.apple.com/macos/contacts/"
+    platforms: ["macOS", "iOS"]
+    price: "$0 (free, built into macOS/iOS)"
+    category: "communication"
+    module: "communication/contacts"
+    priority: "high"
+    description: >
+      Native macOS contact management synced with Exchange server. Maintains
+      institutional directory, personal contacts, and integration with Mail and
+      Calendar. Can be extended with BusyContacts for enhanced features while
+      maintaining Exchange sync compatibility.
+    data_flow:
+      input: "Exchange contact directory from institution, manual contact creation, vCard import, contact discovery from email"
+      processing: "Contact organization with groups, custom fields for academic metadata (institution, role, research areas), contact merging and deduplication, notes and relationships"
+      output: "Contact lookup for email composition, caller ID on iPhone, contact sharing via vCard, directory access for other apps"
+    integration_points:
+      - apple-mail: "Synced via Exchange"
+      - busycontacts: "Enhanced interface (optional)"
+      - alfred: "Quick contact lookup"
+    required_by:
+      - "communication/contacts"
+    learning_curve: "Very low (familiar interface)"
+    free_trial: "N/A (free forever)"
+
+  eaglefiler:
+    name: "EagleFiler"
+    url: "https://c-command.com/eaglefiler/"
+    platforms: ["macOS"]
+    price: "$40 (one-time)"
+    category: "communication"
+    module: "communication/eaglefiler"
+    priority: "low"
+    description: >
+      Email archiving and document filing system. Provides long-term email storage
+      with smart tags, powerful search, and organization outside of Mail.app.
+      Complements DEVONthink by handling email archives with email-specific features. 
+      Used for compartmentalization and to work around Exchange server limitations.
+    data_flow:
+      input: "Emails dragged from Apple Mail, automated import via AppleScript, email forwarding, archived mailboxes, .mbox files"
+      processing: "Email database with full-text search, smart folders with complex queries, automatic tagging based on rules, email threading, attachment extraction"
+      output: "Retrieved archived emails, exported emails as PDF or text, search results for project-related correspondence, email metrics and analysis"
+    integration_points:
+      - apple-mail: "Primary source of archived emails"
+      - devonthink: "Complementary archiving (DEVONthink for documents, EagleFiler for email)"
+      - hazel: "Automated email filing rules"
+      - hookmark: "Deep links to archived emails"
+    required_by:
+      - "communication/eaglefiler"
+    learning_curve: "Low-medium (email-specific features)"
+    free_trial: "Yes (full-featured trial)"
+
+  busycal:
+    name: "BusyCal"
+    url: "https://www.busymac.com/busycal/"
+    platforms: ["macOS", "iOS"]
+    price: "$49.99 (Mac), $4.99 (iOS)"
+    category: "communication"
+    module: "communication/busycal"
+    priority: "low"
+    description: >
+      Enhanced calendar application that layers on top of Apple Calendar/Exchange.
+      Provides advanced features like menu bar access, time zone support, weather
+      integration, and better display options. Maintains Exchange compatibility
+      while offering superior interface. Alternative for users wanting more than
+      Apple Calendar.
+    data_flow:
+      input: "Reads Apple Calendar databases (including Exchange), event creation with natural language, .ics imports"
+      processing: "Enhanced calendar views and display options, integrated to-do lists, customizable info panel, time zone calculations, weather forecasts"
+      output: "Events written to Apple Calendar (syncs to Exchange), improved calendar management, menu bar quick access"
+    integration_points:
+      - apple-calendar: "Reads/writes calendar data"
+      - apple-mail: "Exchange integration maintained"
+      - things: "Task integration"
+    required_by:
+      - "communication/busycal"
+    learning_curve: "Low (familiar calendar paradigm)"
+    free_trial: "30 days"
+
+  busycontacts:
+    name: "BusyContacts"
+    url: "https://www.busymac.com/busycontacts/"
+    platforms: ["macOS"]
+    price: "$49.99"
+    category: "communication"
+    module: "communication/busycontacts"
+    priority: "low"
+    description: >
+      Enhanced contact management application that layers on top of Apple Contacts/
+      Exchange. Provides advanced features like custom fields, smart filters,
+      integrated calendar display, and better organization. Maintains Exchange
+      sync while offering superior interface. Alternative for users wanting more
+      than Apple Contacts.
+    data_flow:
+      input: "Reads Apple Contacts databases (including Exchange), manual contact creation, vCard import, contact enrichment"
+      processing: "Advanced contact organization with custom fields, smart filters for complex queries, contact tagging, duplicate detection, relationship tracking"
+      output: "Contacts written to Apple Contacts (syncs to Exchange), enhanced contact lookup, better academic metadata management"
+    integration_points:
+      - apple-contacts: "Reads/writes contact data"
+      - apple-mail: "Exchange integration maintained"
+      - busycal: "Integrated contact/calendar view"
+    required_by:
+      - "communication/busycontacts"
+    learning_curve: "Low (familiar contacts paradigm)"
+    free_trial: "30 days"
+
+  # ==========================================================================
+  # OBSERVATORY MODULE
+  # ==========================================================================
+
+  observatory:
+    name: "Observatory (VIRENS Native)"
+    url: "https://github.com/preterite/virens"
+    platforms: ["macOS", "Linux", "Windows"]
+    price: "$0 (free, included with VIRENS)"
+    category: "analytics"
+    module: "observatory"
+    priority: "high"
+    description: >
+      Academic metrics tracking and career analytics dashboard. Fetches publication
+      data from multiple APIs (Semantic Scholar, OpenAlex, CrossRef, GitHub) and
+      displays h-index, citation counts, publication timeline, and career trajectory
+      in web-based dashboard. Runs on hub machine and accessible from
+      workstations via http://hub.local:8080. SQLite-based for simplicity.
+    data_flow:
+      input: "Publication DOIs and titles from Bookends export, API access to Semantic Scholar, OpenAlex, CrossRef, and GitHub, manual publication list entry"
+      processing: "SQLite database storage, citation count tracking over time, h-index calculation, i10-index calculation, co-author network analysis, GitHub repository statistics, trend analysis"
+      output: "Web dashboard at localhost:8080 or archive.local:8080, CSV exports of citation data, annual/semester career reports, publication timeline visualizations, comparative metrics"
+    integration_points:
+      - bookends: "Publication list import"
+      - obsidian: "Export reports as notes"
+      - scholar-status: "Summary metrics display"
+    required_by:
+      - "observatory"
+    learning_curve: "Low-medium (web interface straightforward, API setup requires some technical knowledge)"
+    free_trial: "N/A (free forever, open source)"
+
+  # ==========================================================================
+  # HEALTH MODULE
+  # ==========================================================================
+
+  scholar-status:
+    name: "scholar-status (VIRENS Native)"
+    url: "https://github.com/preterite/virens"
+    platforms: ["macOS", "Linux"]
+    price: "$0 (free, included with VIRENS)"
+    category: "health"
+    module: "health/monitoring"
+    priority: "high"
+    description: >
+      System health check and status dashboard for VIRENS installation. Reports
+      on framework version, enabled modules, Observatory metrics, Obsidian vault
+      status, sync health, and potential issues. Quick diagnostic tool to verify
+      everything is working correctly. Runs from command line.
+    data_flow:
+      input: "VIRENS configuration files, module enable/disable state, Observatory database, Obsidian vault metadata, git repository status, Homebrew package status"
+      processing: "Version checking against latest framework, module status verification, publication count from Observatory, vault statistics (note count, last modified), sync conflict detection"
+      output: "Terminal report with status indicators, warnings for outdated components, errors for missing dependencies, summary of academic metrics, recommendations for maintenance"
+    integration_points:
+      - observatory: "Displays metrics summary"
+      - obsidian: "Vault health check"
+      - homebrew: "Package status verification"
+      - git: "Repository sync status"
+    required_by:
+      - "health/monitoring"
+    learning_curve: "Very low (simple command-line tool)"
+    free_trial: "N/A (free forever, open source)"
+
+  homebrew:
+    name: "Homebrew"
+    url: "https://brew.sh"
+    platforms: ["macOS", "Linux"]
+    price: "$0 (free, open source)"
+    category: "health"
+    module: "health/system"
+    priority: "high"
+    description: >
+      Package manager for macOS and Linux. Installs command-line tools, languages
+      (Python, Node), and applications. VIRENS uses Homebrew to manage dependencies
+      like Pandoc, Git, Python, and other command-line utilities. Essential for
+      keeping system tools updated and ensuring reproducible installations.
+    data_flow:
+      input: "Brewfile (package definition), brew install commands, brew upgrade commands"
+      processing: "Package download and installation, dependency resolution, formula updates, cask (GUI app) management"
+      output: "Installed command-line tools and applications, updated packages, system environment configuration"
+    integration_points:
+      - pandoc: "Installed via Homebrew"
+      - git: "Installed/updated via Homebrew"
+      - python: "Installed via Homebrew"
+      - scholar-status: "Reports package status"
+    required_by:
+      - "health/system"
+    learning_curve: "Low-medium (command-line tool)"
+    free_trial: "N/A (free forever)"
+
+  apple-passwords:
+    name: "Apple Passwords"
+    url: "https://support.apple.com/guide/security/passwords-sec2feb36f88/web"
+    platforms: ["macOS", "iOS", "iPadOS"]
+    price: "$0 (free, built into macOS/iOS via Keychain)"
+    category: "health"
+    module: "health/security"
+    priority: "high"
+    description: >
+      Native password management system integrated into macOS and iOS via Keychain.
+      Stores API keys, credentials, SSH keys, and application passwords securely
+      with iCloud sync. VIRENS uses Keychain for storing API credentials (Semantic
+      Scholar, OpenAlex, GitHub tokens) and institutional passwords. No third-party
+      password manager required.
+    data_flow:
+      input: "Passwords entered in Safari, app credentials, API tokens, SSH keys, secure notes"
+      processing: "Encrypted storage in Keychain, iCloud Keychain sync across devices, automatic password filling, password generation, security audit"
+      output: "Automatic credential filling in apps and browsers, API key retrieval by scripts, SSH authentication, secure credential sharing between VIRENS components"
+    integration_points:
+      - observatory: "Stores API keys for fetchers"
+      - git: "Stores GitHub credentials"
+      - safari: "Password autofill"
+    required_by:
+      - "health/security"
+    learning_curve: "Very low (automatic in most cases)"
+    free_trial: "N/A (free forever)"
+
+  carbon-copy-cloner:
+    name: "Carbon Copy Cloner"
+    url: "https://bombich.com"
+    platforms: ["macOS"]
+    price: "$39.99 (one-time)"
+    category: "health"
+    module: "health/backup"
+    priority: "low"
+    description: >
+      Bootable backup and disk cloning utility for macOS. Creates exact copies
+      of drives that can boot your Mac if the primary drive fails. More powerful
+      than Time Machine for complete system recovery and migration. Used for
+      backing up hub machine and creating bootable clones of system drives.
+    data_flow:
+      input: "Source drive (system or data), scheduled backup triggers, file-level exclusions"
+      processing: "Incremental block-level copying, bootable volume creation, safety checks and validation, scheduled execution, email notifications"
+      output: "Bootable backup volumes, archived older backups, backup reports and logs, verified disk images"
+    integration_points:
+      - time-machine: "Complementary (CCC for bootable, Time Machine for versioning)"
+      - scholar-status: "Reports backup status"
+    required_by:
+      - "health/backup"
+    learning_curve: "Low-medium (powerful but clear interface)"
+    free_trial: "30 days"
+
+  iterm2:
+    name: "iTerm2"
+    url: "https://iterm2.com"
+    platforms: ["macOS"]
+    price: "$0 (free, open source)"
+    category: "health"
+    module: "health/terminal"
+    priority: "low"
+    description: >
+      Enhanced terminal emulator for macOS with advanced features beyond Terminal.app.
+      Includes split panes, search, autocomplete, triggers, and extensive
+      customization. Useful for power users who spend significant time in command-line
+      environments managing VIRENS scripts and Observatory.
+    data_flow:
+      input: "Shell commands, keyboard shortcuts, configuration profiles, triggers"
+      processing: "Terminal session management, split pane layouts, command history, search and highlighting, profile switching"
+      output: "Command execution in zsh/bash, script output display, log management, session recording"
+    integration_points:
+      - zsh: "Shell environment"
+      - scholar-status: "Command execution"
+      - observatory: "Dashboard launching"
+      - git: "Repository management"
+    required_by:
+      - "health/terminal"
+    learning_curve: "Low (familiar terminal paradigm)"
+    free_trial: "N/A (free forever)"
+
+  git:
+    name: "Git"
+    url: "https://git-scm.com"
+    platforms: ["macOS", "Linux", "Windows"]
+    price: "$0 (free, open source)"
+    category: "health"
+    module: "health/system"
+    priority: "high"
+    description: >
+      Version control system for tracking changes to text files and code. VIRENS
+      uses Git for framework updates, Obsidian vault versioning (optional), and
+      maintaining user instance configurations. Enables rolling back changes,
+      syncing across machines, and collaborative development.
+    data_flow:
+      input: "Changed files in VIRENS directories or Obsidian vault, commit messages, branch operations"
+      processing: "Change tracking with diff, commit history, branch management, remote sync to GitHub/GitLab, conflict resolution"
+      output: "Version history, rollback capability, backup via remote repositories, sync across machines"
+    integration_points:
+      - obsidian: "Optional vault versioning"
+      - homebrew: "Git installation and updates"
+      - scholar-status: "Repository status checking"
+      - github: "Remote repository hosting"
+    required_by:
+      - "health/system"
+    learning_curve: "Medium (command-line, requires learning)"
+    free_trial: "N/A (free forever)"
+
+# ============================================================================
+# PRESET CONFIGURATIONS
+# ============================================================================
+
+presets:
+  starter:
+    name: "Starter"
+    description: "Core research workflow with communication basics"
+    estimated_time: "45-60 minutes"
+    estimated_cost:
+      one_time: "$367.98"
+      monthly: "$0"
+      annual: "$0"
+    apps_required:
+      - obsidian
+      - bookends
+      - devonthink
+      - scrivener
+      - pandoc
+      - drafts
+      - apple-mail
+      - apple-calendar
+      - apple-contacts
+      - apple-passwords
+      - git
+      - homebrew
+    modules_enabled:
+      - research/obsidian
+      - research/bookends
+      - research/devonthink
+      - research/scrivener
+      - research/pandoc
+      - capture/drafts
+      - communication/mail
+      - communication/calendar
+      - communication/contacts
+      - health/monitoring
+      - health/system
+      - health/security
+    optional_enhancements:
+      - latex: "For PDF generation via Pandoc (adds $0, but 7GB download)"
+      - drafts-pro: "$19.99/year for advanced actions"
+
+  researcher:
+    name: "Researcher"
+    description: "Enhanced workflow with automation and task management"
+    estimated_time: "1.5-2 hours"
+    estimated_cost:
+      one_time: "$623.96"
+      monthly: "$0"
+      annual: "$0-19.99"
+    apps_required:
+      - obsidian
+      - bookends
+      - devonthink
+      - scrivener
+      - pandoc
+      - things
+      - hazel
+      - keyboard-maestro
+      - drafts
+      - alfred
+      - highlights
+      - hookmark
+      - typinator
+      - shortcuts
+      - scholar-status
+      - apple-mail
+      - apple-calendar
+      - apple-contacts
+      - apple-passwords
+      - git
+      - homebrew
+    modules_enabled:
+      - research/* (all)
+      - tasks/things
+      - automation/hazel
+      - automation/keyboard-maestro
+      - automation/typinator
+      - automation/shortcuts
+      - capture/drafts
+      - capture/highlights
+      - discovery/alfred
+      - discovery/hookmark
+      - communication/mail
+      - communication/calendar
+      - communication/contacts
+      - health/* (all monitoring, system, security)
+    optional_subscriptions:
+      - drafts-pro: "$19.99/year for advanced actions"
+    optional_extensions:
+      - latex: "$0 for PDF generation"
+      - readwise: "$8.99/month for highlight sync"
+
+  rockstar:
+    name: "Rockstar"
+    description: "Complete automation, analytics, and mobile integration"
+    estimated_time: "2-3 hours"
+    estimated_cost:
+      one_time: "$727.93"
+      monthly: "$8.99-12.98"
+      annual: "$107.88-179.76"
+    apps_required:
+      - obsidian
+      - bookends
+      - devonthink
+      - scrivener
+      - pandoc
+      - latex
+      - things
+      - hazel
+      - keyboard-maestro
+      - drafts
+      - alfred
+      - highlights
+      - readwise
+      - hookmark
+      - typinator
+      - data-jar
+      - shortcuts
+      - just-press-record
+      - observatory
+      - scholar-status
+      - apple-mail
+      - apple-calendar
+      - apple-contacts
+      - apple-passwords
+      - git
+      - homebrew
+    modules_enabled:
+      - research/* (all)
+      - tasks/* (all)
+      - automation/* (all)
+      - capture/* (all except scanner-pro, tot)
+      - discovery/* (all)
+      - communication/* (core only: mail, calendar, contacts)
+      - observatory
+      - health/* (all except backup, terminal)
+    required_subscriptions:
+      - readwise: "$8.99/month or $89.99/year"
+    optional_subscriptions:
+      - drafts-pro: "$19.99/year for advanced actions"
+    optional_extensions:
+      - tot: "$19.99 for mobile scratchpad"
+      - scanner-pro: "$19.99/year for document scanning"
+      - eaglefiler: "$40 for email archiving"
+      - busycal: "$49.99 + $4.99 iOS for enhanced calendar"
+      - busycontacts: "$49.99 for enhanced contacts"
+      - carbon-copy-cloner: "$39.99 for bootable backups"
+      - iterm2: "$0 for enhanced terminal"
+      - hyperduck: "$0 for mobile-to-Mac automation"
+
+  custom:
+    name: "Custom Configuration"
+    description: "Pick exactly what you need"
+    estimated_time: "Varies"
+    estimated_cost:
+      note: "Calculated based on selected modules"
+    modules_enabled: []  # User selects interactively

@@ -1,0 +1,152 @@
+#!/usr/bin/env zsh
+# VIRENS System Status Check
+
+# Determine framework location
+if [ -f "$HOME/.virens" ]; then
+    USER_INSTANCE=$(cat "$HOME/.virens")
+    VIRENS_CONTAINER=$(dirname "$USER_INSTANCE")
+    FRAMEWORK_DIR="$VIRENS_CONTAINER/virens"
+else
+    FRAMEWORK_DIR="$HOME/Local/virens/virens"
+fi
+
+# Source framework functions
+source "$FRAMEWORK_DIR/engine/infrastructure/core/shell-functions.zsh"
+
+echo "═══════════════════════════════════════════════════════════"
+echo "              VIRENS SYSTEM STATUS"
+echo "═══════════════════════════════════════════════════════════"
+echo ""
+
+# Framework version
+echo "Framework:"
+FRAMEWORK_VERSION=$(cat "$FRAMEWORK_DIR/VERSION" 2>/dev/null || echo "unknown")
+echo "  Version: $FRAMEWORK_VERSION"
+echo "  Location: $FRAMEWORK_DIR"
+echo ""
+
+# User instance
+USER_DIR=$(virens_user)
+echo "User Instance:"
+echo "  Location: $USER_DIR"
+if [ -d "$USER_DIR" ]; then
+    echo "  Status: ✅ Found"
+    
+    # Check if it's a git repo
+    if [ -d "$USER_DIR/.git" ]; then
+        echo "  Git: ✅ Initialized"
+        # Check for uncommitted changes
+        cd "$USER_DIR"
+        if git diff-index --quiet HEAD -- 2>/dev/null; then
+            echo "  Changes: ✅ Clean working tree"
+        else
+            CHANGED=$(git status --porcelain | wc -l | xargs)
+            echo "  Changes: ⚠️  $CHANGED uncommitted changes"
+        fi
+    else
+        echo "  Git: ❌ Not initialized"
+    fi
+else
+    echo "  Status: ❌ Not found"
+fi
+echo ""
+
+# Machine configuration
+echo "Machine:"
+MACHINE_NAME=$(virens_machine_name)
+MACHINE_ROLE=$(virens_machine_role)
+echo "  Name: $MACHINE_NAME"
+echo "  Role: $MACHINE_ROLE"
+echo ""
+
+# Enabled modules
+echo "Enabled Modules:"
+if [ -f "$USER_DIR/config/modules.yaml" ]; then
+    MODULE_COUNT=$(grep "^  - " "$USER_DIR/config/modules.yaml" | wc -l | xargs)
+    echo "  Total: $MODULE_COUNT modules enabled"
+    grep "^  - " "$USER_DIR/config/modules.yaml" | sed 's/^  - /  ✅ /'
+else
+    echo "  ⚠️  No modules.yaml found"
+fi
+echo ""
+
+# Observatory
+echo "Observatory:"
+if virens_module_enabled "observatory"; then
+    DB_PATH=$(observatory_db)
+    if [ -f "$DB_PATH" ]; then
+        echo "  Status: ✅ Database found"
+        # Get database size
+        DB_SIZE=$(du -h "$DB_PATH" | cut -f1)
+        echo "  Database: $DB_SIZE"
+        
+        # Try to get publication count (if sqlite3 is available)
+        if command -v sqlite3 &> /dev/null; then
+            PUB_COUNT=$(sqlite3 "$DB_PATH" "SELECT COUNT(*) FROM publications;" 2>/dev/null || echo "unknown")
+            echo "  Publications: $PUB_COUNT tracked"
+        fi
+    else
+        echo "  Status: ⚠️  Database not found"
+        echo "  Run: observatory-configure"
+    fi
+else
+    echo "  Status: ⚪ Module not enabled"
+    echo "  Enable in: $USER_DIR/config/modules.yaml"
+fi
+echo ""
+
+# Obsidian vault
+echo "Obsidian Vault:"
+VAULT_PATH="$USER_DIR/obsidian-vault"
+if [ -d "$VAULT_PATH" ]; then
+    echo "  Status: ✅ Found"
+    NOTE_COUNT=$(fd -t f ".md$" "$VAULT_PATH" 2>/dev/null | wc -l | xargs)
+    echo "  Notes: $NOTE_COUNT"
+    
+    # Count by directory
+    if [ $NOTE_COUNT -gt 0 ]; then
+        INBOX_COUNT=$(fd -t f ".md$" "$VAULT_PATH/000_inbox" 2>/dev/null | wc -l | xargs)
+        ZETTEL_COUNT=$(fd -t f ".md$" "$VAULT_PATH/300_zettels" 2>/dev/null | wc -l | xargs)
+        echo "  Inbox: $INBOX_COUNT"
+        echo "  Zettels: $ZETTEL_COUNT"
+    fi
+else
+    echo "  Status: ❌ Not found"
+fi
+echo ""
+
+# Dotfiles
+echo "Dotfiles:"
+for dotfile in .zshrc .zprofile .gitconfig; do
+    if [ -L "$HOME/$dotfile" ]; then
+        TARGET=$(readlink "$HOME/$dotfile")
+        if [[ "$TARGET" == *"$USER_DIR"* ]]; then
+            echo "  ✅ $dotfile → user instance"
+        else
+            echo "  ⚠️  $dotfile → $TARGET (not user instance)"
+        fi
+    elif [ -f "$HOME/$dotfile" ]; then
+        echo "  ⚠️  $dotfile exists but is not a symlink"
+    else
+        echo "  ❌ $dotfile not found"
+    fi
+done
+echo ""
+
+# System dependencies
+echo "Core Dependencies:"
+DEPS=("git" "fd" "rg" "pandoc" "python3")
+for dep in "${DEPS[@]}"; do
+    if command -v $dep &> /dev/null; then
+        echo "  ✅ $dep"
+    else
+        echo "  ❌ $dep (missing)"
+    fi
+done
+echo ""
+
+echo "═══════════════════════════════════════════════════════════"
+echo ""
+echo "Run 'virens-update' to update the framework"
+echo "Documentation: $FRAMEWORK_DIR/engine/docs/"
+echo ""

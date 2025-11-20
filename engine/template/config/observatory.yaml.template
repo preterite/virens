@@ -1,0 +1,39 @@
+# Observatory Configuration
+# Copy to observatory.yaml and add your information
+
+user:
+  name: "Your Name"
+  email: "your.email@institution.edu"
+  institution: "Your University"
+  orcid: ""  # Optional: Your ORCID identifier
+
+github:
+  username: "your-github-username"
+  
+  # Optional: Track specific repos by name
+  # If empty, Observatory tracks your top 3 repos by stars
+  tracked_repos:
+    - "my-research-project"
+    - "dissertation-code"
+  
+  # Optional: Keywords to identify academic repos
+  # Used to filter which repos count as "academic"
+  academic_keywords:
+    - "research"
+    - "academic"
+    - "scholar"
+    - "science"
+    - "study"
+    - "dissertation"
+
+api_keys:
+  # Optional: Semantic Scholar API key (increases rate limits)
+  # Get from: https://www.semanticscholar.org/product/api
+  semantic_scholar: ""
+  
+  # Required for GitHub statistics
+  # Get from: https://github.com/settings/tokens
+  # Required scopes: repo (for private repo access)
+  github: ""
+  
+  # OpenAlex and CrossRef don't require API keys

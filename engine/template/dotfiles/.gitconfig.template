@@ -1,0 +1,21 @@
+[user]
+    name = Your Name
+    email = you@institution.edu
+
+[core]
+    editor = nano
+    # Uncomment if you want global .gitignore
+    # excludesfile = ~/.gitignore_global
+
+[init]
+    defaultBranch = main
+
+[pull]
+    rebase = false
+
+[alias]
+    st = status
+    ci = commit
+    br = branch
+    co = checkout
+    lg = log --oneline --graph --decorate

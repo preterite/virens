@@ -1,0 +1,10 @@
+# Machine Configuration
+# Copy to machine.yaml and customize
+
+role: workstation  # 'hub' or 'workstation'
+name: my-mac       # Human-readable name
+
+capabilities:
+  observatory_dashboard: true
+  handles_automation: true
+  primary_research: true

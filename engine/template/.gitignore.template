@@ -1,0 +1,31 @@
+# User Instance .gitignore
+# This protects your private data from accidental commits
+
+# Obsidian workspace and cache (personal, not shared)
+.obsidian/workspace*
+.obsidian/cache
+
+# Observatory data (personal academic metrics)
+observatory/data/*.db
+observatory/logs/*.log
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Private keys and credentials (should be in Keychain, but just in case)
+*.key
+*.pem
+credentials.yaml
+secrets.yaml

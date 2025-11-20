@@ -1,0 +1,20 @@
+#!/usr/bin/env zsh
+# VIRENS User .zprofile
+# Environment variables and PATH configuration
+
+# VIRENS environment
+export VIRENS_USER="$(cat ~/.virens 2>/dev/null || echo "$HOME/Local/virens/user1")"
+export VIRENS_FRAMEWORK="$(dirname $VIRENS_USER)/virens"
+
+# Add VIRENS bin to PATH
+export PATH="$VIRENS_FRAMEWORK/engine/framework/bin:$PATH"
+
+# Python environment (if needed for Observatory)
+# Uncomment if you use Python 3.13 for machine learning or Observatory
+# export PATH="/Library/Frameworks/Python.framework/Versions/3.13/bin:$PATH"
+
+# Personal environment variables
+# export MY_VAR="value"
+
+# Homebrew (if installed in non-standard location)
+# eval "$(/opt/homebrew/bin/brew shellenv)"

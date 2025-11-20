@@ -1,0 +1,36 @@
+# Enabled Modules
+# Copy to modules.yaml and enable desired modules
+
+modules:
+  # Research
+  - research/obsidian
+  - research/bookends
+  - research/devonthink
+  - research/scrivener
+  - research/pandoc
+  # - research/latex  # Uncomment if needed (7GB download)
+  
+  # Tasks
+  # - tasks/things
+  
+  # Capture
+  - capture/drafts
+  # - capture/highlights
+  # - capture/readwise
+  
+  # Discovery
+  # - discovery/alfred
+  # - discovery/hookmark
+  
+  # Communication
+  - communication/mail
+  - communication/calendar
+  - communication/contacts
+  
+  # Observatory (academic metrics)
+  # - observatory
+  
+  # Health
+  - health/monitoring
+  - health/system
+  - health/security

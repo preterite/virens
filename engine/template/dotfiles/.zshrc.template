@@ -1,0 +1,37 @@
+#!/usr/bin/env zsh
+# VIRENS User .zshrc
+# This file sources framework functions and adds personal customizations
+
+# Determine framework location via .virens pointer
+if [ -f "$HOME/.virens" ]; then
+    USER_INSTANCE=$(cat "$HOME/.virens")
+    VIRENS_CONTAINER=$(dirname "$USER_INSTANCE")
+    FRAMEWORK_DIR="$VIRENS_CONTAINER/virens"
+else
+    FRAMEWORK_DIR="$HOME/Local/virens/virens"
+fi
+
+# Source framework functions
+source "$FRAMEWORK_DIR/engine/infrastructure/core/shell-functions.zsh"
+source "$FRAMEWORK_DIR/engine/infrastructure/core/machine-detect.zsh"
+source "$FRAMEWORK_DIR/engine/infrastructure/core/logging.zsh"
+
+# Load machine configuration
+virens_load_machine_config
+
+# Personal aliases (customize these)
+alias ll='ls -lah'
+alias gs='git status'
+alias gp='git pull'
+alias gc='git commit'
+
+# Personal functions (add your own)
+# function my_function() {
+#     # Your code here
+# }
+
+# Load any custom functions
+[ -f "$(virens_user)/dotfiles/custom-functions.zsh" ] && source "$(virens_user)/dotfiles/custom-functions.zsh"
+
+# Path additions (add your personal paths here)
+# export PATH="$HOME/bin:$PATH"

@@ -1,0 +1,9 @@
+# Path Configuration
+# Copy to paths.yaml and customize
+
+paths:
+  obsidian_vault: "~/Local/virens/user1/obsidian-vault"
+  bookends_attachments: "~/Documents/Bookends Attachments"
+  devonthink_database: "~/Documents/DEVONthink"
+  downloads_watch: "~/Downloads"
+  desktop_inbox: "~/Desktop/Inbox"

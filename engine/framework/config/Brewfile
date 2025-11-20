@@ -1,0 +1,25 @@
+# VIRENS Framework Core Dependencies
+# Essential command-line tools required by the framework
+
+# Version control
+brew "git"
+
+# Shell enhancements
+brew "zsh"
+brew "zsh-completions"
+
+# Modern file operations (replaces find/grep)
+brew "fd"       # Modern find
+brew "ripgrep"  # Modern grep (rg)
+brew "fzf"      # Fuzzy finder
+brew "tree"     # Directory visualization
+
+# Document processing
+brew "pandoc"            # Universal document converter
+brew "pandoc-citeproc"   # Citation processing for Pandoc
+
+# Python (required for Observatory analytics)
+brew "python@3.13"
+
+# That's it! Keep it simple.
+# Advanced users can add more via their user-specific Brewfile
