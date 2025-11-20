@@ -2,7 +2,6 @@
 title: "VIRENS License Guide for Institutions"
 license: "CC-BY-SA-4.0"
 copyright: "(c) 2025 Mike Edwards"
-framework/docs/legal/for-institutions.md
 ---
 
 # VIRENS Licensing for Institutions

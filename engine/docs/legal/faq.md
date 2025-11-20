@@ -2,7 +2,6 @@
 title: "VIRENS Licensing FAQ"
 license: "CC-BY-SA-4.0"
 copyright: "(c) 2025 Mike Edwards"
-framework/docs/legal/faq.md
 ---
 
 # VIRENS Licensing FAQ
