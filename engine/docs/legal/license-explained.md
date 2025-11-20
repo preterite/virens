@@ -1,7 +1,7 @@
 ---
-title: VIRENS Licenses Explained
-license: CC-BY-SA-4.0
-copyright: "(c) 2025 Mike Edwards
+title: "VIRENS Licenses Explained"
+license: "CC-BY-SA-4.0"
+copyright: "(c) 2025 Mike Edwards"
 framework/docs/legal/license-explained.md
 ---
 
