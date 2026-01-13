@@ -1,0 +1,89 @@
+#!/usr/bin/env zsh
+# Update VIRENS framework
+
+# Determine framework location
+if [ -f "$HOME/.virens" ]; then
+    USER_INSTANCE=$(cat "$HOME/.virens")
+    VIRENS_CONTAINER=$(dirname "$USER_INSTANCE")
+    FRAMEWORK_DIR="$VIRENS_CONTAINER/virens"
+else
+    FRAMEWORK_DIR="$HOME/Local/virens/virens"
+fi
+
+echo "═══════════════════════════════════════════════════════════"
+echo "              VIRENS FRAMEWORK UPDATE"
+echo "═══════════════════════════════════════════════════════════"
+echo ""
+
+cd "$FRAMEWORK_DIR" || exit 1
+
+CURRENT_VERSION=$(cat VERSION 2>/dev/null || echo "unknown")
+echo "Current version: $CURRENT_VERSION"
+echo "Framework location: $FRAMEWORK_DIR"
+echo ""
+
+# Check if this is a git repository
+if [ ! -d ".git" ]; then
+    echo "❌ Not a git repository"
+    echo "Cannot update automatically."
+    echo ""
+    echo "If you cloned VIRENS, this shouldn't happen."
+    echo "Try: cd $FRAMEWORK_DIR && git status"
+    exit 1
+fi
+
+echo "Checking for updates..."
+git fetch origin
+
+# Check if behind
+BEHIND=$(git rev-list HEAD..origin/main --count 2>/dev/null)
+
+if [ $? -ne 0 ]; then
+    echo "⚠️  Could not check for updates"
+    echo "Run 'git fetch origin' manually to check"
+    exit 1
+fi
+
+if [ "$BEHIND" -eq 0 ]; then
+    echo "✅ Framework is up to date"
+    echo ""
+    exit 0
+fi
+
+echo "Updates available! ($BEHIND commits behind)"
+echo ""
+echo "Changes:"
+git log HEAD..origin/main --oneline --decorate
+echo ""
+
+read "response?Apply updates? (y/n): "
+
+if [[ "$response" =~ ^[Yy]$ ]]; then
+    echo ""
+    echo "Updating framework..."
+    
+    if git pull origin main; then
+        NEW_VERSION=$(cat VERSION 2>/dev/null || echo "unknown")
+        echo ""
+        echo "✅ Updated to version $NEW_VERSION"
+        echo ""
+        echo "Changes applied:"
+        git log --oneline --decorate -5
+        echo ""
+        echo "Restart your shell to apply changes:"
+        echo "  exec zsh"
+    else
+        echo ""
+        echo "❌ Update failed"
+        echo "You may have local changes that conflict."
+        echo "Run 'git status' to see what's wrong."
+        exit 1
+    fi
+else
+    echo ""
+    echo "Update cancelled"
+    echo "Your framework remains at version $CURRENT_VERSION"
+fi
+
+echo ""
+echo "═══════════════════════════════════════════════════════════"

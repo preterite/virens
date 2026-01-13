@@ -1,0 +1,49 @@
+#!/usr/bin/env zsh
+# Configure Observatory module
+
+echo "═══════════════════════════════════════════════════════════"
+echo "          OBSERVATORY CONFIGURATION"
+echo "═══════════════════════════════════════════════════════════"
+echo ""
+
+# Source framework functions
+if [ -f "$HOME/.virens" ]; then
+    USER_INSTANCE=$(cat "$HOME/.virens")
+else
+    echo "❌ No .virens file found"
+    echo "Run the VIRENS installer first"
+    exit 1
+fi
+
+CONFIG_FILE="$USER_INSTANCE/config/observatory.yaml"
+
+echo "Observatory configuration file:"
+echo "  $CONFIG_FILE"
+echo ""
+
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "❌ Configuration file not found"
+    echo ""
+    echo "Create it from the template:"
+    echo "  cd $USER_INSTANCE/config"
+    echo "  cp observatory.yaml.template observatory.yaml"
+    exit 1
+fi
+
+echo "Configuration found. Please edit with your information:"
+echo ""
+echo "Required fields:"
+echo "  - user.name"
+echo "  - user.email"
+echo "  - github.username"
+echo "  - api_keys.github"
+echo ""
+echo "Optional fields:"
+echo "  - github.tracked_repos (list of repo names to track)"
+echo "  - github.academic_keywords (keywords for filtering academic repos)"
+echo ""
+echo "Edit configuration:"
+echo "  nano $CONFIG_FILE"
+echo ""
+echo "After configuration, Observatory will automatically use your settings."
+echo ""

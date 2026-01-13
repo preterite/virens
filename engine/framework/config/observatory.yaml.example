@@ -1,0 +1,403 @@
+# VIRENS Observatory Configuration Template
+# ===========================================
+# This is the framework template with example values and documentation.
+# Copy to ~/Local/virens/user1/config/observatory.yaml and fill in your actual values.
+#
+# License: AGPL-3.0 (see LICENSE in repository root)
+# Last Updated: 2024-11-21
+
+# ===========================================
+# SYSTEM IDENTIFICATION
+# ===========================================
+system:
+  # Unique identifier for this Observatory instance
+  instance_id: "user1"
+  
+  # Human-readable name for reports
+  researcher_name: "Your Name"
+  
+  # Institution affiliation
+  institution: "Your University"
+  
+  # Primary research field
+  field: "Humanities"
+
+# ===========================================
+# API CREDENTIALS
+# ===========================================
+# SECURITY WARNING: Never commit actual API keys to git!
+# Store real credentials in ~/Local/virens/user1/config/observatory.yaml
+# Add that file to user1/.gitignore
+
+api_credentials:
+  
+  # Semantic Scholar API
+  # Get key at: https://www.semanticscholar.org/product/api#api-key
+  semantic_scholar:
+    api_key: "YOUR_SEMANTIC_SCHOLAR_API_KEY_HERE"
+    rate_limit: 100  # requests per minute
+    base_url: "https://api.semanticscholar.org/graph/v1"
+  
+  # OpenAlex API
+  # Documentation: https://docs.openalex.org/
+  # Polite pool access requires email in User-Agent
+  openalex:
+    email: "your-email@example.com"  # Required for polite pool
+    rate_limit: 100000  # requests per day (polite pool)
+    base_url: "https://api.openalex.org"
+  
+  # CrossRef API
+  # Get key at: https://www.crossref.org/services/metadata-delivery/plus-service/
+  # Optional but recommended for better rate limits
+  crossref:
+    api_key: "YOUR_CROSSREF_API_KEY_HERE"  # Optional
+    email: "your-email@example.com"  # Required for polite pool
+    rate_limit: 50  # requests per second
+    base_url: "https://api.crossref.org"
+  
+  # GitHub API
+  # Create token at: https://github.com/settings/tokens
+  # Required scopes: repo, read:org
+  github:
+    token: "YOUR_GITHUB_PERSONAL_ACCESS_TOKEN"
+    username: "your-github-username"
+    rate_limit: 5000  # requests per hour (authenticated)
+    base_url: "https://api.github.com"
+  
+  # Plausible Analytics API
+  # Get key at: https://plausible.io/settings#api-keys
+  # For tracking website analytics (optional)
+  plausible:
+    api_key: "YOUR_PLAUSIBLE_API_KEY_HERE"  # Optional
+    site_id: "yourdomain.com"
+    base_url: "https://plausible.io/api/v1"
+
+# ===========================================
+# RESEARCHER IDENTITY
+# ===========================================
+researcher:
+  
+  # ORCID identifier (required for publication discovery)
+  # Get yours at: https://orcid.org/
+  orcid_id: "0000-0000-0000-0000"
+  
+  # Alternative identifiers (optional)
+  identifiers:
+    semantic_scholar_id: ""  # Auto-discovered if not provided
+    google_scholar_id: ""
+    researchgate_id: ""
+  
+  # Research interests (for trend analysis)
+  keywords:
+    - "keyword1"
+    - "keyword2"
+    - "keyword3"
+
+# ===========================================
+# PUBLICATION TRACKING
+# ===========================================
+publications:
+  
+  # Primary data source for publication discovery
+  # Options: "orcid", "manual", "bookends"
+  discovery_method: "orcid"
+  
+  # Manual publication list (used if discovery_method = "manual")
+  # Or as supplement to ORCID-discovered publications
+  manual_entries: []
+    # Example entry:
+    # - title: "Your Article Title"
+    #   doi: "10.1234/example.doi"
+    #   year: 2023
+    #   type: "article"
+    #   venue: "Journal Name"
+  
+  # Bookends integration (if discovery_method = "bookends")
+  bookends:
+    library_path: "~/Documents/Bookends/Bookends.db"
+    export_format: "bibtex"
+
+# ===========================================
+# JOURNAL MONITORING
+# ===========================================
+# Track specific journals for field awareness
+monitored_journals:
+  - name: "College English"
+    issn: "0010-0994"
+    check_frequency: "monthly"
+  
+  - name: "College Composition and Communication"
+    issn: "0010-096X"
+    check_frequency: "monthly"
+  
+  - name: "Kairos"
+    issn: "1521-2300"
+    check_frequency: "monthly"
+
+# Add more journals as needed
+
+# ===========================================
+# FIELD TREND MONITORING
+# ===========================================
+# Keywords to monitor for emerging trends
+trend_keywords:
+  - "rhetoric"
+  - "composition"
+  - "digital humanities"
+  # Add more keywords as needed
+
+# ===========================================
+# CITATION ANALYSIS
+# ===========================================
+citation_tracking:
+  
+  # How often to fetch citation updates
+  update_frequency: "weekly"  # Options: daily, weekly, monthly
+  
+  # Alert thresholds
+  alerts:
+    new_citations_threshold: 10  # Alert if +10 citations in a week
+    h_index_increase: true  # Alert on h-index changes
+    velocity_decline_weeks: 4  # Alert if zero citations for N weeks
+
+# ===========================================
+# COLLABORATION NETWORK
+# ===========================================
+network_analysis:
+  
+  # Enable co-author network tracking
+  enabled: true
+  
+  # Minimum collaboration threshold
+  min_collaborations: 1
+  
+  # Track collaboration institutions
+  track_institutions: true
+
+# ===========================================
+# TEACHING METRICS
+# ===========================================
+teaching:
+  
+  # Enable teaching load tracking
+  enabled: true
+  
+  # Standard course load (for comparison)
+  baseline_courses_per_semester: 2.0
+  
+  # Course types to track
+  course_types:
+    - "composition"
+    - "graduate_seminar"
+    - "undergraduate"
+
+# ===========================================
+# DATABASE CONFIGURATION
+# ===========================================
+database:
+  
+  # SQLite database location
+  # Relative to user instance root: ~/Local/virens/user1/
+  path: "data/observatory.db"
+  
+  # Backup settings
+  backup:
+    enabled: true
+    frequency: "daily"
+    retention_days: 30
+    location: "data/backups"
+  
+  # JSON export settings
+  json_export:
+    enabled: true
+    frequency: "weekly"
+    location: "data/exports"
+    formats:
+      - "citations"
+      - "publications"
+      - "metrics"
+
+# ===========================================
+# DASHBOARD CONFIGURATION
+# ===========================================
+dashboard:
+  
+  # Flask server settings
+  host: "0.0.0.0"  # Listen on all interfaces for network access
+  port: 5555
+  debug: false  # Set true for development only
+  
+  # Dashboard access
+  # Archive machine: http://localhost:5555
+  # Network machines: http://archive.local:5555
+  hostname: "archive.local"
+  
+  # Refresh intervals (seconds)
+  refresh_intervals:
+    real_time: 30  # Dashboard auto-refresh
+    citation_update: 3600  # 1 hour
+    trend_update: 86400  # 24 hours
+  
+  # Dashboard modes
+  modes:
+    - "research"  # Citation metrics, field trends
+    - "planning"  # Deadlines, submission targets
+  
+  # Visualization preferences
+  visualization:
+    default_chart_type: "line"
+    color_scheme: "accessible"  # Deuteranomaly-friendly
+    include_patterns: true  # Use patterns in addition to colors
+
+# ===========================================
+# ANALYZER SCHEDULES
+# ===========================================
+# Four specialized analyzers with different schedules
+analyzers:
+  
+  citation_analyzer:
+    enabled: true
+    schedule: "weekly"  # Options: daily, weekly, monthly
+    day_of_week: "monday"  # If weekly
+    time: "06:00"  # 24-hour format
+  
+  trend_analyzer:
+    enabled: true
+    schedule: "monthly"
+    day_of_month: 1  # First day of month
+    time: "06:00"
+  
+  network_analyzer:
+    enabled: true
+    schedule: "weekly"
+    day_of_week: "sunday"
+    time: "06:00"
+  
+  teaching_analyzer:
+    enabled: true
+    schedule: "semester"  # Runs at semester start/end
+    semester_weeks: 16
+
+# ===========================================
+# AUTOMATION
+# ===========================================
+automation:
+  
+  # LaunchAgent configuration (macOS)
+  launch_agent:
+    enabled: true
+    label: "com.virens.observatory"
+    run_at_load: false
+    start_interval: 86400  # 24 hours in seconds
+  
+  # Which machine runs the Observatory
+  hub_machine: "archive"  # Runs all analyzers and dashboard
+  
+  # Notification settings
+  notifications:
+    enabled: true
+    critical_only: false  # If true, only critical alerts
+    channels:
+      - "desktop"  # macOS Notification Center
+      # - "email"  # Future: email alerts
+
+# ===========================================
+# LOGGING
+# ===========================================
+logging:
+  
+  # Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: "INFO"
+  
+  # Log file location (relative to user instance)
+  file: "logs/observatory.log"
+  
+  # Log rotation
+  rotation:
+    max_bytes: 10485760  # 10 MB
+    backup_count: 5
+  
+  # Console output
+  console: true
+
+# ===========================================
+# REPORTING
+# ===========================================
+reports:
+  
+  # Automatic report generation
+  enabled: true
+  
+  # Report types and frequencies
+  schedules:
+    weekly_summary:
+      enabled: true
+      day: "monday"
+      format: "markdown"
+    
+    monthly_trends:
+      enabled: true
+      day_of_month: 1
+      format: "pdf"
+    
+    semester_review:
+      enabled: true
+      format: "markdown"
+  
+  # Report output location (relative to user instance)
+  output_directory: "reports"
+  
+  # Include in reports
+  sections:
+    - "citation_metrics"
+    - "publication_timeline"
+    - "collaboration_network"
+    - "field_trends"
+    - "teaching_correlation"
+
+# ===========================================
+# ADVANCED FEATURES
+# ===========================================
+advanced:
+  
+  # Experimental features (use with caution)
+  experimental:
+    llm_summarization: false  # AI-powered abstract generation
+    predictive_analytics: false  # Citation trajectory prediction
+  
+  # Performance tuning
+  performance:
+    cache_duration: 3600  # API response cache (seconds)
+    max_concurrent_requests: 5
+    request_timeout: 30  # seconds
+  
+  # Data retention
+  retention:
+    raw_api_responses: 90  # days
+    processed_data: 365  # days
+    reports: 730  # days (2 years)
+
+# ===========================================
+# INTEGRATION POINTS
+# ===========================================
+integrations:
+  
+  # Integration with other VIRENS components
+  bookends:
+    enabled: false
+    sync_citations: false
+  
+  obsidian:
+    enabled: false
+    export_notes: false
+    vault_path: "~/Local/virens/user1/obsidian-vault"
+  
+  scholar_status:
+    enabled: true
+    include_in_status_check: true
+
+# ===========================================
+# END OF CONFIGURATION
+# ===========================================
+# For detailed documentation, see:
+# ~/Local/virens/virens/engine/docs/reference/observatory.md

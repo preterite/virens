@@ -1,0 +1,28 @@
+#!/usr/bin/env zsh
+
+# Scholar Documentation Browser
+DOCS_DIR="${HOME}/.dotfiles/docs"
+
+if [[ ! -d $DOCS_DIR ]]; then
+    mkdir -p $DOCS_DIR
+fi
+
+cat > $DOCS_DIR/README.md <<'DOC'
+# Scholar Research Environment
+
+## Commands
+- scholar-status: Check system status
+- scholar-docs: View this documentation
+
+## Components Active
+- Observatory monitoring
+- iCloud sync engine
+- Error intelligence
+- Documentation system
+
+## Logs
+~/.dotfiles/data/logs/scholar.log
+DOC
+
+cat $DOCS_DIR/README.md
+print "\n📁 Documentation: $DOCS_DIR"
