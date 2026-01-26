@@ -97,7 +97,14 @@ echo ""
 
 # Obsidian vault
 echo "Obsidian Vault:"
-VAULT_PATH="$USER_DIR/obsidian-vault"
+# Read vault path from paths.yaml, with fallback to default
+if [ -f "$USER_DIR/config/paths.yaml" ]; then
+    VAULT_PATH_RAW=$(rg --no-line-number '^obsidian_vault:' "$USER_DIR/config/paths.yaml" | sed 's/obsidian_vault: *//' | tr -d '"')
+    # Expand ~ to $HOME
+    VAULT_PATH="${VAULT_PATH_RAW/#\~/$HOME}"
+else
+    VAULT_PATH="$USER_DIR/obsidian-vault"
+fi
 if [ -d "$VAULT_PATH" ]; then
     echo "  Status: ✅ Found"
     NOTE_COUNT=$(fd -t f ".md$" "$VAULT_PATH" 2>/dev/null | wc -l | xargs)

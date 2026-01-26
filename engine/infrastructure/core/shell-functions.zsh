@@ -41,6 +41,28 @@ virens_user() {
     fi
 }
 
+# Machine configuration helpers
+virens_machine_name() {
+    # Returns machine name from config/machine.yaml
+    local user_dir=$(virens_user)
+    if [ -f "$user_dir/config/machine.yaml" ]; then
+        rg --no-line-number '^name:' "$user_dir/config/machine.yaml" 2>/dev/null | sed 's/name: *//' | tr -d '"'
+    else
+        # Fallback to system hostname
+        scutil --get ComputerName 2>/dev/null || hostname
+    fi
+}
+
+virens_machine_role() {
+    # Returns machine role from config/machine.yaml (hub or workstation)
+    local user_dir=$(virens_user)
+    if [ -f "$user_dir/config/machine.yaml" ]; then
+        rg --no-line-number '^role:' "$user_dir/config/machine.yaml" 2>/dev/null | sed 's/role: *//' | tr -d '"'
+    else
+        echo "workstation"  # Default role
+    fi
+}
+
 # Module helpers
 virens_module_enabled() {
     # Check if a module is enabled
@@ -64,7 +86,18 @@ observatory_db() {
 # Quick navigation
 alias cdv='cd $(virens_framework)'
 alias cdu='cd $(virens_user)'
-alias cdo='cd $(virens_user)/obsidian-vault'
+alias cdo='cd $(virens_obsidian_vault)'
+
+# Get Obsidian vault path from config
+virens_obsidian_vault() {
+    local user_dir=$(virens_user)
+    if [ -f "$user_dir/config/paths.yaml" ]; then
+        local vault_raw=$(rg --no-line-number '^obsidian_vault:' "$user_dir/config/paths.yaml" 2>/dev/null | sed 's/obsidian_vault: *//' | tr -d '"')
+        echo "${vault_raw/#\~/$HOME}"
+    else
+        echo "$user_dir/obsidian-vault"
+    fi
+}
 
 # Framework updates
 virens_update() {
