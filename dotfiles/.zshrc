@@ -127,7 +127,7 @@ if [[ -f "$VIRENS_CONFIG/paths.yaml" ]]; then
 else
   # Set defaults if config doesn't exist
   export OBSIDIAN_VAULT="$VIRENS_USER/obsidian-vault"
-  export DEVONTHINK_DB="$HOME/Databases/DEVONthink Local/Scholar.dtBase2"
+  export DEVONTHINK_DB="$HOME/Databases/DEVONthink Local/Resources.dtBase2"
 fi
 
 # Convenience aliases for common paths
