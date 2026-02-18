@@ -16,7 +16,7 @@ brew "tree"     # Directory visualization
 
 # Document processing
 brew "pandoc"            # Universal document converter
-brew "pandoc-citeproc"   # Citation processing for Pandoc
+brew "pandoc-crossref"   # Cross-references and citations for Pandoc
 
 # Python (required for Observatory analytics)
 brew "python@3.13"
