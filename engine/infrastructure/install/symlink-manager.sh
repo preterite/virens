@@ -24,8 +24,10 @@ fi
 # Dotfiles to symlink
 DOTFILES=(
     ".zshrc"
+    ".zshrc.local"
     ".zprofile"
     ".gitconfig"
+    ".p10k.zsh"
 )
 
 # Create .virens pointer file
