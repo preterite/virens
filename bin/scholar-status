@@ -12,6 +12,7 @@ fi
 
 # Source framework functions
 source "$FRAMEWORK_DIR/engine/infrastructure/core/shell-functions.zsh"
+source "$FRAMEWORK_DIR/engine/infrastructure/core/machine-detect.zsh"
 
 echo "═══════════════════════════════════════════════════════════"
 echo "              VIRENS SYSTEM STATUS"
@@ -97,6 +98,7 @@ echo ""
 
 # Obsidian vault
 echo "Obsidian Vault:"
+<<<<<<< Updated upstream
 # Read vault path from paths.yaml, with fallback to default
 if [ -f "$USER_DIR/config/paths.yaml" ]; then
     VAULT_PATH_RAW=$(rg --no-line-number '^obsidian_vault:' "$USER_DIR/config/paths.yaml" | sed 's/obsidian_vault: *//' | tr -d '"')
@@ -105,6 +107,18 @@ if [ -f "$USER_DIR/config/paths.yaml" ]; then
 else
     VAULT_PATH="$USER_DIR/obsidian-vault"
 fi
+||||||| Stash base
+VAULT_PATH="$USER_DIR/obsidian-vault"
+=======
+if [ -f "$USER_DIR/config/paths.yaml" ]; then
+    VAULT_PATH=$(grep '^obsidian_vault:' "$USER_DIR/config/paths.yaml" | sed 's/obsidian_vault: *//' | tr -d '"')
+    # Expand ~ to $HOME
+    VAULT_PATH="${VAULT_PATH/#\~/$HOME}"
+else
+    VAULT_PATH="$USER_DIR/obsidian-vault"
+fi
+echo "  Location: $VAULT_PATH"
+>>>>>>> Stashed changes
 if [ -d "$VAULT_PATH" ]; then
     echo "  Status: ✅ Found"
     NOTE_COUNT=$(fd -t f ".md$" "$VAULT_PATH" 2>/dev/null | wc -l | xargs)
