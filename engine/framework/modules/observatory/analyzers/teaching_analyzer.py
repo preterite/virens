@@ -51,7 +51,7 @@ class TeachingAnalyzer:
         if publications_file.exists():
             with open(publications_file) as f:
                 pub_data = json.load(f)
-                publications = pub_data.get('papers', [])
+                publications = pub_data if isinstance(pub_data, list) else pub_data.get('papers', [])
         
         # Analyze course distribution
         course_distribution = self._analyze_course_distribution(courses_data)
@@ -108,10 +108,11 @@ class TeachingAnalyzer:
         
         for course in courses:
             course_name = course.get('name', '')
+            course_code = course.get('course_code', '')
             semester = course.get('semester', 'Unknown')
             
             # Classify course
-            course_type = self._classify_course(course_name)
+            course_type = self._classify_course(course_name, course_code, course.get('course_type', ''))
             
             # Update counts
             distribution['total_courses'] += 1
@@ -123,10 +124,17 @@ class TeachingAnalyzer:
         
         return distribution
     
-    def _classify_course(self, course_name: str) -> str:
-        """Classify course into one of the tracked types"""
+    def _classify_course(self, course_name: str, course_code: str = '', explicit_type: str = '') -> str:
+        """Classify course into one of the tracked types.
+        Respects explicit course_type if provided (e.g. from backfill data).
+        Falls back to name/code pattern matching.
+        """
+        # Honour explicit classification from data source
+        if explicit_type in ('english_101', 'graduate_seminar', 'other_undergrad'):
+            return explicit_type
+        combined = f"{course_code} {course_name}".lower()
         for type_key, type_names in self.COURSE_TYPES.items():
-            if any(name.lower() in course_name.lower() for name in type_names):
+            if any(name.lower() in combined for name in type_names):
                 return type_key
         return 'other_undergrad'
     
@@ -201,7 +209,7 @@ class TeachingAnalyzer:
         for course in courses:
             semester = course.get('semester', '')
             year = self._extract_year_from_semester(semester)
-            course_type = self._classify_course(course.get('name', ''))
+            course_type = self._classify_course(course.get('name', ''), course.get('course_code', ''), course.get('course_type', ''))
             
             if year not in semester_analysis:
                 semester_analysis[year] = {
@@ -262,7 +270,7 @@ class TeachingAnalyzer:
                 outcomes['total_students'] += enrollment
                 outcomes['courses_with_data'] += 1
                 
-                course_type = self._classify_course(course.get('name', ''))
+                course_type = self._classify_course(course.get('name', ''), course.get('course_code', ''), course.get('course_type', ''))
                 course_type_stats[course_type]['count'] += 1
                 course_type_stats[course_type]['total_students'] += enrollment
         
@@ -316,7 +324,7 @@ class TeachingAnalyzer:
             
             semester_courses.append({
                 'name': course.get('name', ''),
-                'type': self._classify_course(course.get('name', ''))
+                'type': self._classify_course(course.get('name', ''), course.get('course_code', ''), course.get('course_type', ''))
             })
         
         # Add final semester
