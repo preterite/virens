@@ -114,31 +114,35 @@ class TrendAnalyzer:
     
     def _identify_emerging_topics(self, papers: List[Dict]) -> List[str]:
         """
-        Identify topics that are appearing more frequently
-        compared to previous month
+        Identify topics appearing in the most recent 90 days.
+        Uses 'publication_date' (ISO string, e.g. '2025-11-01') as stored
+        by the OpenAlex fetcher. Returns titles of recent papers that match
+        at least one monitored keyword.
         """
-        # This is simplified - in production, you'd compare to historical data
-        recent_papers = [p for p in papers 
-                        if self._is_recent(p.get('date', ''))]
-        
+        recent_papers = [p for p in papers
+                         if self._is_recent(p.get('publication_date', ''))]
+
         if not recent_papers:
             return []
-        
-        # Extract common phrases (simplified)
+
         emerging = []
-        for paper in recent_papers[:5]:  # Top 5 recent papers
+        for paper in recent_papers:
             title = paper.get('title', '')
-            if any(kw in title.lower() for kw in ['ai', 'llm', 'generative']):
+            matched = paper.get('matched_keywords', [])
+            if matched:
                 emerging.append(title)
-        
-        return emerging
-    
-    def _is_recent(self, date_str: str, days: int = 30) -> bool:
-        """Check if date is within last N days"""
+
+        return emerging[:5]
+
+    def _is_recent(self, date_str: str, days: int = 90) -> bool:
+        """Check if date string (YYYY-MM-DD or ISO datetime) is within last N days."""
+        if not date_str:
+            return False
         try:
-            date = datetime.fromisoformat(date_str)
+            # Handle both 'YYYY-MM-DD' and full ISO datetime strings
+            date = datetime.fromisoformat(date_str[:10])
             return (datetime.now() - date).days <= days
-        except:
+        except (ValueError, TypeError):
             return False
     
     def _empty_analysis(self) -> Dict:

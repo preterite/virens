@@ -565,10 +565,18 @@ def fetch_openalex_data():
     fetcher.update_all_citations()
 
 
-def fetch_field_papers_data(days_back: int = 90):
-    """Convenience function to fetch field papers."""
+def fetch_field_papers_data(mode: str = "recent") -> list:
+    """Convenience function to fetch field papers.
+
+    Args:
+        mode: "recent" (default) — 90 days, feeds weekly reporter.
+              "annual"           — 365 days, feeds TrendAnalyzer monthly run.
+    """
+    if mode not in ("recent", "annual"):
+        raise ValueError(f"mode must be 'recent' or 'annual', got '{mode}'")
+    days = 365 if mode == "annual" else 90
     fetcher = OpenAlexFetcher()
-    return fetcher.fetch_field_papers(days_back=days_back)
+    return fetcher.fetch_field_papers(days_back=days)
 
 
 if __name__ == "__main__":
