@@ -218,27 +218,45 @@ class OpenAlexFetcher(BaseFetcher):
         
         return intersection / union if union > 0 else 0.0
     
+    def get_work_by_doi(self, doi: str) -> Optional[Dict]:
+        """Look up a work directly by DOI — most reliable identification method."""
+        # Normalise DOI: strip https://doi.org/ prefix if present
+        doi_clean = doi.replace("https://doi.org/", "").replace("http://doi.org/", "")
+        data = self._make_request(f"works/https://doi.org/{doi_clean}", {})
+        if data and "id" in data:
+            self._log(f"DOI lookup succeeded: {doi_clean}")
+            return data
+        self._log(f"DOI lookup returned no result: {doi_clean}", "WARN")
+        return None
+
     def enrich_publication(self, pub_id: int, pub_data: Dict) -> bool:
         """Enrich a publication record with OpenAlex data.
 
-        Strategy: query by ORCID first to get the researcher's own works,
-        then match by title within that set. Falls back to generic title
-        search only if ORCID lookup finds no match.
+        Strategy (in priority order):
+        1. DOI lookup — direct, unambiguous, no name-disambiguation risk.
+        2. ORCID-filtered title match — if DOI absent and ORCID is indexed.
+        3. Generic title search — last resort, prone to false matches; logged as WARN.
         """
         title = pub_data["title"]
         year = pub_data.get("year")
+        doi = pub_data.get("doi")
 
         work = None
 
-        # Try ORCID-based lookup first
-        if ORCID_ID:
+        # Strategy 1: DOI lookup (preferred)
+        if doi:
+            work = self.get_work_by_doi(doi)
+
+        # Strategy 2: ORCID-filtered title match
+        if not work and ORCID_ID:
             if not hasattr(self, '_orcid_works_cache'):
                 self._orcid_works_cache = self.get_works_by_orcid(ORCID_ID)
-            work = self._find_work_in_results(title, self._orcid_works_cache, year)
+            if self._orcid_works_cache:
+                work = self._find_work_in_results(title, self._orcid_works_cache, year)
 
-        # Fall back to title search if ORCID lookup didn't match
+        # Strategy 3: generic title search (last resort)
         if not work:
-            self._log(f"ORCID lookup miss, falling back to title search: {title[:50]}...")
+            self._log(f"DOI/ORCID lookup miss, falling back to title search: {title[:50]}...", "WARN")
             work = self.search_work_by_title(title, year)
 
         if not work:
