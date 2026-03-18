@@ -1,104 +1,64 @@
 #!/usr/bin/env python3
 """
-Configuration management for Academic Observatory
-Adjusted for existing SRE structure
+Observatory Core Config — VIRENS-native
+Replaces the old SRE-hardcoded Config class.
+Loads user1/config/observatory.yaml via the load_config() merger.
 """
 
-import json
+import sys
 from pathlib import Path
-from typing import Dict, Any, Optional
 
-class Config:
-    """Centralized configuration management"""
-    
-    def __init__(self, sre_home: Optional[Path] = None):
-        if sre_home is None:
-            sre_home = Path.home() / "AcademicSync" / "SRE"
-        
-        self.sre_home = Path(sre_home)
-        self.data_dir = self.sre_home / "data"
-        self.config_dir = self.data_dir / "config"
-        self.observatory_data = self.data_dir / "observatory"
-        self.cache_dir = self.observatory_data / "cache"
-        
-        # Ensure directories exist
+# Add user1/observatory to path so we can import load_config
+_user_obs = Path.home() / 'Local' / 'virens' / 'user1' / 'observatory'
+if str(_user_obs) not in sys.path:
+    sys.path.insert(0, str(_user_obs))
+
+from config import load_config as _load_config
+
+class ConfigAdapter:
+    """
+    Translates the YAML config structure into the attribute-style interface
+    that the analyzers and fetchers expect (config.email, config.database_path, etc.)
+    """
+    def __init__(self):
+        self._config = _load_config()
+        user_root = Path.home() / 'Local' / 'virens' / 'user1'
+        self.sre_home   = user_root          # legacy name
+        self.data_dir   = user_root / 'data'
+        self.observatory_data = self.data_dir / 'observatory'
+        self.cache_dir  = self.observatory_data / 'cache'
         self.cache_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Load configurations (lazy loading)
-        self._credentials = None
-        self._peers = None
-        self._journals = None
-        self._thresholds = None
-        self._fields = None
-    
-    @property
-    def credentials(self) -> Dict[str, Any]:
-        """Load credentials (lazy loading)"""
-        if self._credentials is None:
-            cred_file = self.config_dir / "credentials.json"
-            if cred_file.exists():
-                with open(cred_file) as f:
-                    self._credentials = json.load(f)
-            else:
-                raise FileNotFoundError(
-                    f"Credentials file not found: {cred_file}\n"
-                    f"Copy credentials.json.template and add your API keys"
-                )
-        return self._credentials
-    
-    @property
-    def peers(self) -> Dict[str, Any]:
-        """Load peer researchers configuration"""
-        if self._peers is None:
-            with open(self.config_dir / "peers.json") as f:
-                self._peers = json.load(f)
-        return self._peers
-    
-    @property
-    def journals(self) -> Dict[str, Any]:
-        """Load monitored journals configuration"""
-        if self._journals is None:
-            with open(self.config_dir / "journals.json") as f:
-                self._journals = json.load(f)
-        return self._journals
-    
-    @property
-    def thresholds(self) -> Dict[str, Any]:
-        """Load notification thresholds configuration"""
-        if self._thresholds is None:
-            with open(self.config_dir / "thresholds.json") as f:
-                self._thresholds = json.load(f)
-        return self._thresholds
-    
-    @property
-    def fields(self) -> Dict[str, Any]:
-        """Load monitored fields and keywords"""
-        if self._fields is None:
-            with open(self.config_dir / "fields.json") as f:
-                self._fields = json.load(f)
-        return self._fields
-    
+
     @property
     def database_path(self) -> Path:
-        """Get path to SQLite database"""
-        return self.observatory_data / "observatory.db"
-    
-    def get_api_key(self, service: str) -> Optional[str]:
-        """Get API key for a specific service"""
-        return self.credentials.get(service, {}).get("api_key")
-    
-    def is_service_enabled(self, service: str) -> bool:
-        """Check if a service is enabled"""
-        service_config = self.credentials.get(service, {})
-        return service_config.get("enabled", True)  # Default to enabled
-    
-    def save_peers(self):
-        """Save updated peers configuration"""
-        with open(self.config_dir / "peers.json", 'w') as f:
-            json.dump(self._peers, f, indent=2)
-    
-    def __repr__(self):
-        return f"Config(sre_home={self.sre_home}, db={self.database_path})"
+        return Path(self._config['database']['path'])
 
-# Global config instance
-config = Config()
+    @property
+    def email(self) -> str:
+        return self._config['api_credentials']['openalex']['email']
+
+    def get_api_key(self, service: str) -> str:
+        if service == 'semantic_scholar':
+            return self._config['api_credentials']['semantic_scholar']['api_key']
+        elif service == 'github':
+            return self._config['api_credentials']['github']['token']
+        elif service == 'crossref':
+            return self._config['api_credentials']['crossref'].get('api_key', '')
+        elif service == 'plausible':
+            return self._config['api_credentials']['plausible'].get('api_key', '')
+        raise ValueError(f"Unknown service: {service}")
+
+    def get_orcid_id(self) -> str:
+        return self._config['researcher']['orcid_id']
+
+    def get_github_username(self) -> str:
+        return self._config['api_credentials']['github']['username']
+
+    def __getitem__(self, key):
+        return self._config[key]
+
+    def get(self, key, default=None):
+        return self._config.get(key, default)
+
+
+config = ConfigAdapter()

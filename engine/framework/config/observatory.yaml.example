@@ -192,6 +192,167 @@ teaching:
     - "undergraduate"
 
 # ===========================================
+# TEACHING DATA IMPORT
+# ===========================================
+# Configure CSV/Excel import from your institution's SIS (Student Information System).
+# Supports PeopleSoft, Ellucian Banner, Workday, and custom exports.
+# Usage: python3 observatory/tools/teaching_import.py path/to/export.csv
+#
+# One-time setup: export your course history, set term_format and csv_mapping
+# to match your institution's column headers, then run the import script.
+
+teaching_import:
+
+  # Term format your institution uses in exports.
+  # Options:
+  #   "peoplesoft"  — numeric codes like 202610 (YYYYT0 where T=term digit)
+  #   "banner"      — numeric codes like 202680 (YYYYT0, different term digits)
+  #   "workday"     — "Academic Period YYYY-YYYY Term" format
+  #   "readable"    — "Fall 2026", "Spring 2025", "Summer 2024"
+  #   "short"       — "F26", "S25", "Su24", "2026FA", "2025SP"
+  #   "custom"      — provide custom_term_pattern regex below
+  term_format: "readable"
+
+  # Only used if term_format is "custom"
+  # Must contain named groups: (?P<year>...) and (?P<term>...)
+  # Example for "2026-Fall": "(?P<year>\d{4})-(?P<term>\w+)"
+  custom_term_pattern: null
+
+  # Column mapping: what your institution calls each field in CSV exports.
+  # Left side = Observatory field name (fixed). Right side = your CSV column header.
+  # Set to null for fields your export doesn't include.
+  csv_mapping:
+    term: "Term"                    # PeopleSoft: "Term", Banner: "Term Code"
+    course_code: "Subject Catalog"  # PeopleSoft: "Subject Catalog", Banner: "Subject Course"
+    course_name: "Class Descr"      # PeopleSoft: "Class Descr", Banner: "Course Title"
+    section: null                   # PeopleSoft: "Class Nbr", Banner: "CRN"
+    enrollment: null                # PeopleSoft: "Tot Enrl", Banner: "Enrollment"
+    credit_hours: null              # PeopleSoft: "Units", Banner: "Credit Hours"
+    instructional_mode: null        # "In Person", "Online", "Hybrid" (if available)
+
+  # Course type classification rules.
+  # The teaching analyzer groups courses by type for load analysis.
+  # Patterns are matched against the course_code field.
+  course_types:
+    first_year_composition:
+      # Add your institution's FYC course code(s)
+      match_patterns:
+        - "ENGL 101"      # Example: WSU College Composition
+        # - "WRIT 101"    # Example: another institution
+        # - "COMP 1301"   # Example: another institution
+      label: "College Composition"
+
+    graduate_seminar:
+      # Match by course number range within a prefix
+      match_patterns:
+        - prefix: "ENGL"
+          number_range: [500, 699]
+        # - prefix: "RHET"
+        #   number_range: [500, 699]
+      label: "Graduate Seminar"
+
+    undergraduate:
+      # Catch-all for courses not matching above categories.
+      # Matched last, after more specific types.
+      match_patterns:
+        - prefix: "ENGL"
+          number_range: [100, 499]
+      label: "Undergraduate"
+
+  # Contract model — defines what "normal load" means at your institution.
+  # The teaching analyzer uses this for compliance checking.
+  contract:
+    courses_per_semester: 2        # Standard teaching load
+    load_split: [40, 40, 20]      # teaching, research, service (must sum to 100)
+    semesters_per_year: 2          # 2 for semester system, 3 for trimester/quarter
+    overload_threshold: 3          # Courses per semester that triggers overload alert
+
+# ===========================================
+# ACADEMIC EVENTS TRACKING
+# ===========================================
+# Vault-based career event tracking via Obsidian notes with YAML frontmatter.
+# Events sync from vault notes to observatory.db via obsidian_sync.py.
+#
+# Architecture (Option B — parallel tables):
+#   speaking  → dedicated `speaking` table (pre-built, existing CRUD methods)
+#   teaching  → dedicated `teaching` table (populated via teaching_import or direct insert)
+#   all else  → `academic_events` table (core columns + JSON metadata)
+#
+# The academic_events table uses core + JSON metadata design:
+#   Core columns: id, category, title, status, date_created, date_modified,
+#                 date_start, date_end, notes, vault_path
+#   metadata column: JSON blob with category-specific fields
+#   This avoids wide nullable tables and means adding new event categories
+#   requires no schema migration — just a new config entry and template.
+
+academic_events:
+
+  # Enable vault-to-database sync
+  enabled: true
+
+  # Vault directory for event notes (relative to Scholar vault root)
+  vault_directory: "000_observatory/events"
+
+  # Sync frequency (via LaunchAgent)
+  sync_interval: "hourly"
+
+  # Event categories tracked in academic_events table.
+  # Each category gets its own Templater template in the vault.
+  categories:
+    publication:
+      template: "T_event-publication.md"
+      statuses: ["draft", "submitted", "under-review", "revise-resubmit",
+                 "accepted", "in-press", "published", "rejected"]
+      # Metadata fields (stored as JSON in academic_events.metadata):
+      #   venue, venue_issn, co_authors, date_submitted, date_accepted,
+      #   date_published, doi, citekey, event_type (article/chapter/book/
+      #   review/edited-collection)
+
+    grant:
+      template: "T_event-grant.md"
+      statuses: ["prospecting", "drafting", "submitted", "under-review",
+                 "awarded", "active", "completed", "declined"]
+      # Metadata fields:
+      #   funder, program, amount_requested, amount_awarded, date_submitted,
+      #   date_decision, date_start, date_end, co_pis, role (PI/Co-PI/
+      #   Senior Personnel/Consultant)
+
+    service:
+      template: "T_event-service.md"
+      statuses: ["invited", "accepted", "active", "completed", "declined"]
+      # Metadata fields:
+      #   organization, service_type (committee/review/governance/mentoring),
+      #   role (chair/member/reviewer/advisor), date_start, date_end, recurring
+
+    editorial:
+      template: "T_event-editorial.md"
+      statuses: ["invited", "accepted", "active", "completed", "declined"]
+      # Metadata fields:
+      #   venue, editorial_role (editor/associate-editor/editorial-board/
+      #   reviewer), date_start, date_end, reviews_completed
+
+  # Speaking events route to the existing `speaking` table, not academic_events.
+  # This template exists for vault-side note creation; sync writes to `speaking` table.
+  speaking:
+    template: "T_event-speaking.md"
+    statuses: ["invited", "accepted", "confirmed", "completed",
+               "declined", "cancelled"]
+    # Fields (map directly to speaking table columns):
+    #   title, venue, event_date, invitation_date, response_status,
+    #   event_type (keynote/invited-talk/panel/workshop/roundtable),
+    #   honorarium, notes
+
+  # Sync routing: which frontmatter `type` value routes to which DB table.
+  # obsidian_sync.py reads this to determine where each note's data goes.
+  sync_routing:
+    speaking: "speaking"           # → existing speaking table + CRUD methods
+    teaching: "teaching"           # → existing teaching table (rare; bulk import preferred)
+    publication: "academic_events" # → new academic_events table
+    grant: "academic_events"
+    service: "academic_events"
+    editorial: "academic_events"
+
+# ===========================================
 # DATABASE CONFIGURATION
 # ===========================================
 database:
@@ -390,7 +551,7 @@ integrations:
   obsidian:
     enabled: false
     export_notes: false
-    vault_path: "~/Local/virens/user1/obsidian-vault"
+    vault_path: "~/Local/virens/user1/Scholar"
   
   scholar_status:
     enabled: true

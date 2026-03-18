@@ -4,7 +4,9 @@ OpenAlex API fetcher
 Comprehensive publication metadata
 Free and open API
 """
+import json
 import requests
+from datetime import datetime
 from typing import Dict, List, Optional, Any
 import yaml
 from pathlib import Path
@@ -25,6 +27,7 @@ def get_user_config():
 _user_config = get_user_config()
 USER_EMAIL = _user_config.get('user', {}).get('email', 'user@example.edu')
 USER_NAME = _user_config.get('user', {}).get('name', 'Research User')
+ORCID_ID = _user_config.get('researcher', {}).get('orcid_id', '')
 
 # Import observatory modules (no sys.path hack needed in new structure)
 from observatory.core.config import config
@@ -123,6 +126,47 @@ class OpenAlexFetcher(BaseFetcher):
         
         return []
     
+    def get_works_by_orcid(self, orcid_id: str) -> List[Dict]:
+        """Get all works for a researcher by ORCID ID"""
+        params = {
+            "filter": f"author.orcid:{orcid_id}",
+            "per-page": 200
+        }
+
+        data = self._make_request("works", params)
+
+        if data and "results" in data:
+            works = data["results"]
+            self._log(f"Found {len(works)} works for ORCID {orcid_id}")
+            return works
+
+        return []
+
+    def _find_work_in_results(self, title: str, works: List[Dict], year: Optional[int] = None) -> Optional[Dict]:
+        """Find a specific work by title (and optionally year) within a list of works"""
+        best_match = None
+        best_score = 0.0
+
+        for work in works:
+            work_title = work.get("title", "")
+            if not work_title:
+                continue
+
+            # Year filter if provided
+            if year and work.get("publication_year") != year:
+                continue
+
+            score = self._title_similarity(work_title.lower(), title.lower())
+            if score > best_score:
+                best_score = score
+                best_match = work
+
+        if best_match and best_score > 0.5:
+            self._log(f"ORCID match (score {best_score:.2f}): {best_match.get('title', '')[:60]}...")
+            return best_match
+
+        return None
+
     def search_work_by_title(self, title: str, year: Optional[int] = None) -> Optional[Dict]:
         """Search for a specific work by title and optionally year"""
         # Clean title for better matching
@@ -175,13 +219,28 @@ class OpenAlexFetcher(BaseFetcher):
         return intersection / union if union > 0 else 0.0
     
     def enrich_publication(self, pub_id: int, pub_data: Dict) -> bool:
-        """Enrich a publication record with OpenAlex data"""
+        """Enrich a publication record with OpenAlex data.
+
+        Strategy: query by ORCID first to get the researcher's own works,
+        then match by title within that set. Falls back to generic title
+        search only if ORCID lookup finds no match.
+        """
         title = pub_data["title"]
         year = pub_data.get("year")
-        
-        # Search for the work
-        work = self.search_work_by_title(title, year)
-        
+
+        work = None
+
+        # Try ORCID-based lookup first
+        if ORCID_ID:
+            if not hasattr(self, '_orcid_works_cache'):
+                self._orcid_works_cache = self.get_works_by_orcid(ORCID_ID)
+            work = self._find_work_in_results(title, self._orcid_works_cache, year)
+
+        # Fall back to title search if ORCID lookup didn't match
+        if not work:
+            self._log(f"ORCID lookup miss, falling back to title search: {title[:50]}...")
+            work = self.search_work_by_title(title, year)
+
         if not work:
             self._log(f"Could not find work: {title[:50]}...", "WARN")
             return False
@@ -197,13 +256,24 @@ class OpenAlexFetcher(BaseFetcher):
                 # Strip the https://doi.org/ prefix if present
                 pub_data["doi"] = doi.replace("https://doi.org/", "")
         
+        # Get authors from OpenAlex if we don't have them
+        if not pub_data.get("authors"):
+            authorships = work.get("authorships", [])
+            author_names = [
+                a.get("author", {}).get("display_name", "")
+                for a in authorships
+                if a.get("author", {}).get("display_name")
+            ]
+            if author_names:
+                pub_data["authors"] = ", ".join(author_names)
+
         # Get abstract if we don't have it
         if not pub_data.get("abstract"):
             inverted_abstract = work.get("abstract_inverted_index")
             if inverted_abstract:
                 # Reconstruct abstract from inverted index
                 pub_data["abstract"] = self._reconstruct_abstract(inverted_abstract)
-        
+
         # Save updated publication
         db.add_publication(pub_data)
         
@@ -326,10 +396,162 @@ class OpenAlexFetcher(BaseFetcher):
         
         return []  # Placeholder for now
 
+    def fetch_field_papers(self, days_back: int = 90, relevance_threshold: int = 2) -> List[Dict]:
+        """
+        Fetch recent papers from monitored journals via OpenAlex.
+        Scores each paper against monitored keywords; stores papers meeting threshold.
+        """
+        from datetime import date, timedelta
+        import json as _json
+
+        # Load journals and keywords from user config
+        journals = _user_config.get('monitored_journals', [])
+        keywords = _user_config.get('trend_keywords', [])
+
+        if not journals:
+            self._log("No journals configured in observatory.yaml — skipping field papers fetch", "WARN")
+            return []
+
+        if not keywords:
+            self._log("No keywords configured in observatory.yaml — scoring disabled", "WARN")
+
+        since_date = (date.today() - timedelta(days=days_back)).isoformat()
+        all_papers = []
+
+        for journal in journals:
+            issn = journal.get('issn')
+            name = journal.get('name', issn)
+
+            if not issn:
+                self._log(f"Journal entry missing ISSN, skipping: {journal}", "WARN")
+                continue
+
+            self._log(f"Fetching recent papers from {name} (ISSN {issn}) since {since_date}")
+
+            params = {
+                "filter": f"primary_location.source.issn:{issn},from_publication_date:{since_date}",
+                "per-page": 50,
+                "select": "id,title,publication_year,publication_date,cited_by_count,concepts,abstract_inverted_index,authorships,primary_location"
+            }
+
+            data = self._make_request("works", params)
+
+            if not data or "results" not in data:
+                self._log(f"No results for {name}", "WARN")
+                continue
+
+            for work in data["results"]:
+                title = work.get("title", "")
+                if not title:
+                    continue
+
+                # Score against keywords
+                score = self._score_paper_relevance(work, keywords)
+
+                if score < relevance_threshold:
+                    continue
+
+                # Reconstruct abstract if available
+                abstract = ""
+                inv_abstract = work.get("abstract_inverted_index")
+                if inv_abstract:
+                    abstract = self._reconstruct_abstract(inv_abstract)
+
+                # Build author list
+                authorships = work.get("authorships", [])
+                authors = [
+                    a.get("author", {}).get("display_name", "")
+                    for a in authorships
+                    if a.get("author", {}).get("display_name")
+                ]
+
+                paper = {
+                    "openalex_id": work["id"].replace("https://openalex.org/", ""),
+                    "title": title,
+                    "journal": name,
+                    "issn": issn,
+                    "year": work.get("publication_year"),
+                    "publication_date": work.get("publication_date"),
+                    "citation_count": work.get("cited_by_count", 0),
+                    "abstract": abstract,
+                    "authors": authors,
+                    "relevance_score": score,
+                    "matched_keywords": self._get_matched_keywords(work, keywords),
+                    "fetched_at": datetime.now().isoformat()
+                }
+
+                all_papers.append(paper)
+                self._log(f"  Scored {score}: {title[:60]}...")
+
+        self._log(f"fetch_field_papers: {len(all_papers)} relevant papers across all journals")
+
+        # Write to raw JSON for TrendAnalyzer
+        raw_dir = config.observatory_data / "raw"
+        raw_dir.mkdir(parents=True, exist_ok=True)
+        field_papers_path = raw_dir / "field_papers.json"
+        field_papers_path.write_text(_json.dumps(all_papers, indent=2))
+        self._log(f"Written: {field_papers_path}")
+
+        # Store in database
+        for paper in all_papers:
+            db.add_field_paper(paper)
+
+        return all_papers
+
+    def _score_paper_relevance(self, work: Dict, keywords: List[str]) -> int:
+        """Count how many monitored keywords appear in title, abstract, or concepts."""
+        if not keywords:
+            return 0
+
+        title = (work.get("title") or "").lower()
+
+        abstract_text = ""
+        inv_abstract = work.get("abstract_inverted_index")
+        if inv_abstract:
+            abstract_text = " ".join(inv_abstract.keys()).lower()
+
+        concept_names = [
+            c.get("display_name", "").lower()
+            for c in work.get("concepts", [])
+            if c.get("score", 0) > 0.3
+        ]
+        concept_text = " ".join(concept_names)
+
+        full_text = f"{title} {abstract_text} {concept_text}"
+
+        return sum(1 for kw in keywords if kw.lower() in full_text)
+
+    def _get_matched_keywords(self, work: Dict, keywords: List[str]) -> List[str]:
+        """Return list of keywords that matched this paper."""
+        if not keywords:
+            return []
+
+        title = (work.get("title") or "").lower()
+        abstract_text = ""
+        inv_abstract = work.get("abstract_inverted_index")
+        if inv_abstract:
+            abstract_text = " ".join(inv_abstract.keys()).lower()
+        concept_names = [
+            c.get("display_name", "").lower()
+            for c in work.get("concepts", [])
+            if c.get("score", 0) > 0.3
+        ]
+        full_text = f"{title} {abstract_text} {' '.join(concept_names)}"
+
+        return [kw for kw in keywords if kw.lower() in full_text]
+
+
 def fetch_openalex_data():
     """Convenience function to fetch all OpenAlex data"""
     fetcher = OpenAlexFetcher()
     fetcher.update_all_citations()
+
+
+def fetch_field_papers_data(days_back: int = 90):
+    """Convenience function to fetch field papers."""
+    fetcher = OpenAlexFetcher()
+    return fetcher.fetch_field_papers(days_back=days_back)
+
 
 if __name__ == "__main__":
     fetch_openalex_data()

@@ -38,7 +38,7 @@ class CitationAnalyzer:
         df = pd.DataFrame(data.get('citations', []))
         
         if df.empty:
-            return self._empty_analysis()
+            analysis = self._empty_analysis()
             self._save_analysis(analysis, 'citation_analysis')
             return analysis
 
@@ -59,8 +59,16 @@ class CitationAnalyzer:
         # Detect citation bursts
         burst_detected, burst_paper = self._detect_citation_burst(df)
         
-        # H-index calculation (simplified)
-        h_index = self._calculate_h_index(data.get('papers', []))
+        # H-index calculation — load papers.json separately
+        papers_file = self.raw_data / "papers.json"
+        papers_data = []
+        if papers_file.exists():
+            with open(papers_file) as pf:
+                papers_data = json.load(pf)
+                # papers.json is a list of paper dicts with citation_count key
+                # _calculate_h_index expects dicts with 'citations' key, so remap
+                papers_data = [{'citations': p.get('citation_count', 0)} for p in papers_data]
+        h_index = self._calculate_h_index(papers_data)
         
         analysis = {
             'timestamp': datetime.now().isoformat(),
@@ -166,7 +174,10 @@ class CitationAnalyzer:
             traceback.print_exc()
 
 if __name__ == '__main__':
-    data_dir = Path.home() / 'AcademicSync/SRE/observatory/data'
+    import sys
+    sys.path.insert(0, str(Path.home() / 'Local/virens/virens/engine/framework/modules/observatory'))
+    from core.config import config
+    data_dir = config.observatory_data
     analyzer = CitationAnalyzer(data_dir)
     results = analyzer.analyze_citations()
     print(json.dumps(results, indent=2))

@@ -80,7 +80,7 @@ virens_module_enabled() {
 observatory_db() {
     # Returns path to Observatory database
     local user_dir=$(virens_user)
-    echo "$user_dir/observatory/data/observatory.db"
+    echo "$user_dir/data/observatory.db"
 }
 
 # Quick navigation

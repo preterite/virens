@@ -147,6 +147,29 @@ class Database:
                 )
             ''')
             
+            # Academic events (publications, grants, service, editorial)
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS academic_events (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    category TEXT NOT NULL,
+                    title TEXT NOT NULL,
+                    status TEXT,
+                    date_created TEXT DEFAULT CURRENT_TIMESTAMP,
+                    date_modified TEXT DEFAULT CURRENT_TIMESTAMP,
+                    date_start TEXT,
+                    date_end TEXT,
+                    notes TEXT,
+                    vault_path TEXT,
+                    metadata TEXT
+                )
+            ''')
+
+            # Add vault_path to speaking table if missing (migration)
+            cursor.execute("PRAGMA table_info(speaking)")
+            speaking_cols = [row[1] for row in cursor.fetchall()]
+            if 'vault_path' not in speaking_cols:
+                cursor.execute('ALTER TABLE speaking ADD COLUMN vault_path TEXT')
+
             # External metrics (GitHub, website analytics, etc.)
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS external_metrics (
@@ -184,22 +207,32 @@ class Database:
         with self.get_connection() as conn:
             cursor = conn.cursor()
             
-            # Check if publication exists (by semantic_scholar_id or title+year)
+            # Check if publication exists (by semantic_scholar_id, DOI, or title+year)
             semantic_id = pub_data.get('semantic_scholar_id')
-            
+            doi = pub_data.get('doi')
+            existing = None
+
             if semantic_id:
                 cursor.execute(
                     'SELECT id FROM publications WHERE semantic_scholar_id = ?',
                     (semantic_id,)
                 )
-            else:
+                existing = cursor.fetchone()
+
+            if not existing and doi:
+                cursor.execute(
+                    'SELECT id FROM publications WHERE doi = ?',
+                    (doi,)
+                )
+                existing = cursor.fetchone()
+
+            if not existing:
                 # Fallback: match by title and year
                 cursor.execute(
                     'SELECT id FROM publications WHERE title = ? AND year = ?',
                     (pub_data.get('title'), pub_data.get('year'))
                 )
-            
-            existing = cursor.fetchone()
+                existing = cursor.fetchone()
             
             if existing:
                 # Update existing
@@ -451,23 +484,235 @@ class Database:
                         
             return stats
                 
-    def add_external_metric(self, source: str, metric_name: str, 
-                                      metric_value: str, metadata: Optional[Dict], 
-                                      fetched_at: str):
-                    """Add an external metric (GitHub, website analytics, etc.)"""
-                    with self.get_connection() as conn:
-                        cursor = conn.cursor()
-                        cursor.execute('''
-                            INSERT INTO external_metrics 
-                            (source, metric_name, metric_value, metadata, fetched_at)
-                            VALUES (?, ?, ?, ?, ?)
-                        ''', (
-                            source,
-                            metric_name,
-                            metric_value,
-                            json.dumps(metadata) if metadata else None,
-                            fetched_at
-                        ))
-            
+    def add_external_metric(self, source: str, metric_name: str,
+                            metric_value: str, metadata: Optional[Dict],
+                            fetched_at: str):
+        """Add an external metric (GitHub, website analytics, etc.)"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO external_metrics
+                (source, metric_name, metric_value, metadata, fetched_at)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (
+                source,
+                metric_name,
+                metric_value,
+                json.dumps(metadata) if metadata else None,
+                fetched_at
+            ))
+    def add_field_paper(self, paper: Dict[str, Any]):
+        """Add or update a field paper record"""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            openalex_id = paper.get('openalex_id')
+            if openalex_id:
+                cursor.execute('SELECT id FROM field_papers WHERE openalex_id = ?', (openalex_id,))
+                existing = cursor.fetchone()
+                if existing:
+                    cursor.execute('''
+                        UPDATE field_papers SET
+                            title = ?, authors = ?, venue = ?, year = ?,
+                            abstract = ?, keywords = ?, relevance_score = ?,
+                            openalex_id = ?
+                        WHERE id = ?
+                    ''', (
+                        paper.get('title'),
+                        ', '.join(paper.get('authors', [])) if isinstance(paper.get('authors'), list) else paper.get('authors'),
+                        paper.get('journal'),
+                        paper.get('year'),
+                        paper.get('abstract'),
+                        ', '.join(paper.get('matched_keywords', [])) if isinstance(paper.get('matched_keywords'), list) else paper.get('matched_keywords'),
+                        paper.get('relevance_score'),
+                        openalex_id,
+                        existing['id']
+                    ))
+                    return
+            cursor.execute('''
+                INSERT INTO field_papers
+                (title, authors, venue, year, abstract, keywords, relevance_score, openalex_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                paper.get('title'),
+                ', '.join(paper.get('authors', [])) if isinstance(paper.get('authors'), list) else paper.get('authors'),
+                paper.get('journal'),
+                paper.get('year'),
+                paper.get('abstract'),
+                ', '.join(paper.get('matched_keywords', [])) if isinstance(paper.get('matched_keywords'), list) else paper.get('matched_keywords'),
+                paper.get('relevance_score'),
+                paper.get('openalex_id')
+            ))
+
+    def add_academic_event(self, event_data: Dict[str, Any]) -> int:
+        """Add or update an academic event. metadata should be a dict (gets JSON-serialized)."""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+
+            vault_path = event_data.get('vault_path')
+            if vault_path:
+                cursor.execute(
+                    'SELECT id FROM academic_events WHERE vault_path = ?',
+                    (vault_path,)
+                )
+                existing = cursor.fetchone()
+            else:
+                existing = None
+
+            metadata = event_data.get('metadata')
+            if isinstance(metadata, dict):
+                metadata = json.dumps(metadata)
+
+            if existing:
+                event_id = existing['id']
+                cursor.execute('''
+                    UPDATE academic_events SET
+                        category = ?, title = ?, status = ?,
+                        date_modified = ?, date_start = ?, date_end = ?,
+                        notes = ?, vault_path = ?, metadata = ?
+                    WHERE id = ?
+                ''', (
+                    event_data.get('category'),
+                    event_data.get('title'),
+                    event_data.get('status'),
+                    datetime.now().isoformat(),
+                    event_data.get('date_start'),
+                    event_data.get('date_end'),
+                    event_data.get('notes'),
+                    vault_path,
+                    metadata,
+                    event_id
+                ))
+                return event_id
+            else:
+                cursor.execute('''
+                    INSERT INTO academic_events
+                    (category, title, status, date_created, date_modified,
+                     date_start, date_end, notes, vault_path, metadata)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    event_data.get('category'),
+                    event_data.get('title'),
+                    event_data.get('status'),
+                    datetime.now().isoformat(),
+                    datetime.now().isoformat(),
+                    event_data.get('date_start'),
+                    event_data.get('date_end'),
+                    event_data.get('notes'),
+                    vault_path,
+                    metadata
+                ))
+                return cursor.lastrowid
+
+    def get_academic_events(self, category: Optional[str] = None,
+                            status: Optional[str] = None,
+                            year: Optional[int] = None) -> List[Dict[str, Any]]:
+        """Get academic events with optional filters."""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            query = 'SELECT * FROM academic_events WHERE 1=1'
+            params = []
+            if category:
+                query += ' AND category = ?'
+                params.append(category)
+            if status:
+                query += ' AND status = ?'
+                params.append(status)
+            if year:
+                query += ' AND (strftime("%Y", date_start) = ? OR strftime("%Y", date_created) = ?)'
+                params.extend([str(year), str(year)])
+            query += ' ORDER BY date_modified DESC'
+            cursor.execute(query, params)
+            rows = [dict(row) for row in cursor.fetchall()]
+            # Deserialize metadata JSON
+            for row in rows:
+                if row.get('metadata'):
+                    try:
+                        row['metadata'] = json.loads(row['metadata'])
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+            return rows
+
+    def update_academic_event(self, event_id: int, updates: Dict[str, Any]) -> bool:
+        """Update specific fields of an academic event."""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            allowed = {'category', 'title', 'status', 'date_start', 'date_end',
+                        'notes', 'vault_path', 'metadata'}
+            set_clauses = ['date_modified = ?']
+            params = [datetime.now().isoformat()]
+
+            for key, val in updates.items():
+                if key not in allowed:
+                    continue
+                if key == 'metadata' and isinstance(val, dict):
+                    val = json.dumps(val)
+                set_clauses.append(f'{key} = ?')
+                params.append(val)
+
+            if len(set_clauses) == 1:
+                return False  # nothing to update
+
+            params.append(event_id)
+            cursor.execute(
+                f'UPDATE academic_events SET {", ".join(set_clauses)} WHERE id = ?',
+                params
+            )
+            return cursor.rowcount > 0
+
+    def get_speaking_event_by_vault_path(self, vault_path: str) -> Optional[Dict[str, Any]]:
+        """Get a speaking event by its vault_path."""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM speaking WHERE vault_path = ?',
+                           (vault_path,))
+            row = cursor.fetchone()
+            return dict(row) if row else None
+
+    def add_speaking_event_from_vault(self, event_data: Dict[str, Any]) -> int:
+        """Add a speaking event with vault_path tracking."""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO speaking
+                (title, venue, event_date, invitation_date, response_status,
+                 event_type, honorarium, notes, vault_path)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                event_data.get('title'),
+                event_data.get('venue'),
+                event_data.get('event_date'),
+                event_data.get('invitation_date'),
+                event_data.get('response_status'),
+                event_data.get('event_type'),
+                event_data.get('honorarium'),
+                event_data.get('notes'),
+                event_data.get('vault_path')
+            ))
+            return cursor.lastrowid
+
+    def update_speaking_event(self, event_id: int, event_data: Dict[str, Any]):
+        """Update a speaking event by ID."""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE speaking SET
+                    title = ?, venue = ?, event_date = ?, invitation_date = ?,
+                    response_status = ?, event_type = ?, honorarium = ?,
+                    notes = ?, vault_path = ?
+                WHERE id = ?
+            ''', (
+                event_data.get('title'),
+                event_data.get('venue'),
+                event_data.get('event_date'),
+                event_data.get('invitation_date'),
+                event_data.get('response_status'),
+                event_data.get('event_type'),
+                event_data.get('honorarium'),
+                event_data.get('notes'),
+                event_data.get('vault_path'),
+                event_id
+            ))
+
+
 # Global database instance
 db = Database()

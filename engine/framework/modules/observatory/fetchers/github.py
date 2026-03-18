@@ -42,13 +42,16 @@ from observatory.fetchers.base import BaseFetcher
 
 class GitHubFetcher(BaseFetcher):
     """Fetch data from GitHub API"""
-    
-def __init__(self, include_private: bool = True):
+
+    def __init__(self, include_private: bool = True):
         super().__init__("github", rate_limit_delay=1.0)
         # Username from user config (loaded at module level)
         self.username = GITHUB_USERNAME
-        # Token from existing config system (keep this as-is)
-        self.token = config.credentials.get("github", {}).get("token")
+        # Token from config system
+        try:
+            self.token = config.get_api_key('github')
+        except (ValueError, KeyError):
+            self.token = None
         self.base_url = "https://api.github.com"
         self.include_private = include_private
         

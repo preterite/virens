@@ -24,8 +24,11 @@ app = dash.Dash(
 )
 
 # Data paths
-OBSERVATORY_DIR = Path.home() / 'AcademicSync/SRE/observatory'
-DATA_DIR = OBSERVATORY_DIR / 'data'
+import sys
+sys.path.insert(0, str(Path.home() / 'Local/virens/virens/engine/framework/modules/observatory'))
+from core.config import config as _obs_config
+OBSERVATORY_DIR = Path.home() / 'Local/virens/user1/observatory'
+DATA_DIR = _obs_config.observatory_data
 PROCESSED_DIR = DATA_DIR / 'processed'
 
 # Colorblind-friendly color scheme (deuteranomaly-safe)
@@ -487,8 +490,8 @@ if __name__ == '__main__':
     print("   Research Mode: Current activity & alerts")
     print("   Planning Mode: Strategic trajectory & long-term view")
     print("")
-    print("   Archive: http://localhost:8080")
-    print("   Network: http://archive.local:8080")
+    print("   Archive: http://localhost:5555")
+    print("   Network: http://archive.local:5555")
     print("")
-    
-    app.run(host="0.0.0.0", port=8080, debug=False)
+
+    app.run(host="0.0.0.0", port=5555, debug=False)

@@ -59,13 +59,27 @@ class TrendAnalyzer:
         # Emerging topics
         emerging = self._identify_emerging_topics(papers)
         
+        # Top relevant papers sorted by relevance score
+        top_papers = sorted(papers, key=lambda p: p.get('relevance_score', 0), reverse=True)[:5]
+        top_relevant = [
+            {
+                'title': p.get('title', ''),
+                'journal': p.get('journal', ''),
+                'year': p.get('year'),
+                'matched_keywords': p.get('matched_keywords', []),
+                'relevance_score': p.get('relevance_score', 0)
+            }
+            for p in top_papers
+        ]
+
         analysis = {
             'timestamp': datetime.now().isoformat(),
             'period': 'monthly',
             'journal_activity': journal_activity,
             'keyword_trends': keyword_trends,
             'emerging_topics': emerging,
-            'total_papers_monitored': len(papers)
+            'total_papers_monitored': len(papers),
+            'top_relevant_papers': top_relevant
         }
         
         self._save_analysis(analysis, 'trend_analysis')
@@ -149,7 +163,10 @@ class TrendAnalyzer:
             json.dump(analysis, f, indent=2)
 
 if __name__ == '__main__':
-    data_dir = Path.home() / 'AcademicSync/SRE/observatory/data'
+    import sys
+    sys.path.insert(0, str(Path.home() / 'Local/virens/virens/engine/framework/modules/observatory'))
+    from core.config import config
+    data_dir = config.observatory_data
     analyzer = TrendAnalyzer(data_dir)
     results = analyzer.analyze_trends()
     print(json.dumps(results, indent=2))

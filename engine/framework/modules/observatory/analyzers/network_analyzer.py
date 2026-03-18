@@ -40,7 +40,7 @@ class NetworkAnalyzer:
         
         analysis = {
             'timestamp': datetime.now().isoformat(),
-            'total_collaborators': len(G.nodes()) - 1,  # Exclude self
+            'total_collaborators': max(0, len(G.nodes()) - 1),  # Exclude self
             'total_collaborations': G.number_of_edges(),
             'network_metrics': metrics,
             'strategic_collaborators': strategic,
@@ -156,7 +156,10 @@ class NetworkAnalyzer:
             json.dump(analysis, f, indent=2)
 
 if __name__ == '__main__':
-    data_dir = Path.home() / 'AcademicSync/SRE/observatory/data'
+    import sys
+    sys.path.insert(0, str(Path.home() / 'Local/virens/virens/engine/framework/modules/observatory'))
+    from core.config import config
+    data_dir = config.observatory_data
     analyzer = NetworkAnalyzer(data_dir)
     results = analyzer.analyze_network()
     print(json.dumps(results, indent=2))

@@ -18,7 +18,7 @@ class BaseFetcher:
         self.name = name
         self.rate_limit_delay = rate_limit_delay
         self.last_request_time = 0
-        self.cache_dir = Path.home() / "AcademicSync/SRE/data/observatory/cache" / name
+        self.cache_dir = Path.home() / "Local/virens/user1/data/observatory/cache" / name
         self.cache_dir.mkdir(parents=True, exist_ok=True)
     
     def _rate_limit(self):

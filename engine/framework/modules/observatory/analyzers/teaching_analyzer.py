@@ -489,7 +489,10 @@ class TeachingAnalyzer:
             json.dump(analysis, f, indent=2)
 
 if __name__ == '__main__':
-    data_dir = Path.home() / 'AcademicSync/SRE/observatory/data'
+    import sys
+    sys.path.insert(0, str(Path.home() / 'Local/virens/virens/engine/framework/modules/observatory'))
+    from core.config import config
+    data_dir = config.observatory_data
     analyzer = TeachingAnalyzer(data_dir)
     results = analyzer.analyze_teaching()
     print(json.dumps(results, indent=2))
