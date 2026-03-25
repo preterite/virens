@@ -53,7 +53,7 @@ def _format_top_papers(papers: list) -> str:
     for i, p in enumerate(papers[:5], 1):
         kws = ", ".join(p.get('matched_keywords', [])[:3])
         lines.append(
-            f"{i}. **{p['title']}** — {p.get('journal', '?')} ({p.get('year', '?')})"
+            f"{i}. **{p['title']}** — {p.get('authors', '')}. _{p.get('journal', '?')}_ ({p.get('year', '?')})"
             f"  \n   Keywords matched: {kws or 'n/a'}"
         )
     return "\n".join(lines) + "\n"

@@ -64,6 +64,7 @@ class TrendAnalyzer:
         top_relevant = [
             {
                 'title': p.get('title', ''),
+                'authors': p.get('authors', ''),
                 'journal': p.get('journal', ''),
                 'year': p.get('year'),
                 'matched_keywords': p.get('matched_keywords', []),

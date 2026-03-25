@@ -115,9 +115,11 @@ if [ -d "$VAULT_PATH" ]; then
     # Count by directory
     if [ $NOTE_COUNT -gt 0 ]; then
         INBOX_COUNT=$(fd -t f ".md$" "$VAULT_PATH/000_inbox" 2>/dev/null | wc -l | xargs)
-        ZETTEL_COUNT=$(fd -t f ".md$" "$VAULT_PATH/300_zettels" 2>/dev/null | wc -l | xargs)
+        PROJECT_COUNT=$(fd -t f ".md$" "$VAULT_PATH/500_projects" 2>/dev/null | wc -l | xargs)
+        SEED_COUNT=$(fd -t f ".md$" "$VAULT_PATH/000_observatory/seed-candidates" 2>/dev/null | wc -l | xargs)
         echo "  Inbox: $INBOX_COUNT"
-        echo "  Zettels: $ZETTEL_COUNT"
+        echo "  Projects: $PROJECT_COUNT"
+        echo "  Seeds: $SEED_COUNT"
     fi
 else
     echo "  Status: ❌ Not found"

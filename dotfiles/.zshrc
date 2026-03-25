@@ -205,7 +205,11 @@ plugins=(
     macos
     python
     pip
-    virtualenv
+    direnv
+    fnm
+    gh
+    colored-man-pages
+    extract
     command-not-found
     zsh-autosuggestions
     zsh-syntax-highlighting
@@ -227,7 +231,7 @@ export ARCHFLAGS="-arch $MACHINE_ARCH"
 export GIT_CONFIG_GLOBAL="$HOME/.gitconfig"
 
 # VIRENS environment metadata
-export VIRENS_VERSION="3.0"
+export VIRENS_VERSION="3.1"
 
 # ============================================================================
 # EZA CONFIGURATION (Modern ls replacement)
