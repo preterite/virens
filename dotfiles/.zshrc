@@ -80,17 +80,11 @@ export SRE_HOME="$VIRENS_FRAMEWORK"  # Backward compatibility
 # ============================================================================
 # PATH CONFIGURATION
 # ============================================================================
-# Base system paths
-export PATH="$HOME/bin:/usr/local/bin:$PATH"
-
 # VIRENS framework binaries
 export PATH="$VIRENS_FRAMEWORK/bin:$PATH"
 
 # User instance binaries (custom scripts)
 export PATH="$VIRENS_USER/bin:$PATH"
-
-# Development tools
-export PATH="/Applications/Sublime Text.app/Contents/SharedSupport/bin:$PATH"
 
 # ============================================================================
 # USER CONFIGURATION DIRECTORY
