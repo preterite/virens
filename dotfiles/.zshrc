@@ -182,7 +182,16 @@ fi
 # OH-MY-ZSH CONFIGURATION
 # ============================================================================
 export ZSH="$HOME/.oh-my-zsh"
-ZSH_THEME="powerlevel10k/powerlevel10k"
+
+# Powerlevel10k and the two zsh-users plugins load from Homebrew where it has
+# them, so `brew upgrade` moves what actually runs; a machine without the
+# formulae falls back to oh-my-zsh's custom/ copies (Michael, RULED 2026-11-11).
+_hb_zsh="$HOMEBREW_PREFIX/share"
+if [[ -r "$_hb_zsh/powerlevel10k/powerlevel10k.zsh-theme" ]]; then
+  ZSH_THEME=""
+else
+  ZSH_THEME="powerlevel10k/powerlevel10k"
+fi
 
 # Oh-My-Zsh behavior settings
 CASE_SENSITIVE="true"                      # Case-sensitive completion
@@ -192,7 +201,6 @@ DISABLE_UNTRACKED_FILES_DIRTY="true"       # Faster git status in large repos
 HIST_STAMPS="yyyy-mm-dd"                   # History timestamp format
 
 # Plugin configuration
-# Note: zsh-syntax-highlighting must be last in the plugins array
 plugins=(
     git
     brew
@@ -205,12 +213,18 @@ plugins=(
     colored-man-pages
     extract
     command-not-found
-    zsh-autosuggestions
-    zsh-syntax-highlighting
 )
+# Fallback only: these two load from Homebrew below when it has them.
+# zsh-syntax-highlighting comes last, wherever it loads from.
+[[ -r "$_hb_zsh/zsh-autosuggestions/zsh-autosuggestions.zsh" ]] || plugins+=(zsh-autosuggestions)
+[[ -r "$_hb_zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]] || plugins+=(zsh-syntax-highlighting)
 
 # Initialize Oh-My-Zsh
 source $ZSH/oh-my-zsh.sh
+
+# Homebrew's copies, where present
+[[ -z "$ZSH_THEME" ]] && source "$_hb_zsh/powerlevel10k/powerlevel10k.zsh-theme"
+[[ -r "$_hb_zsh/zsh-autosuggestions/zsh-autosuggestions.zsh" ]] && source "$_hb_zsh/zsh-autosuggestions/zsh-autosuggestions.zsh"
 
 # ============================================================================
 # ENVIRONMENT VARIABLES
@@ -479,6 +493,14 @@ POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
 if [[ -f "$HOME/.zshrc.local" ]]; then
   source "$HOME/.zshrc.local"
 fi
+
+# ============================================================================
+# SYNTAX HIGHLIGHTING (LAST)
+# ============================================================================
+# zsh-syntax-highlighting wraps every widget defined before it, so it loads
+# after everything else, .zshrc.local included.
+[[ -r "$_hb_zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]] && source "$_hb_zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+unset _hb_zsh
 
 # ============================================================================
 # POST-INITIALIZATION DISPLAY
