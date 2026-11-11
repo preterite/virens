@@ -344,14 +344,8 @@ if [[ -f ~/.fzf.zsh ]]; then
 fi
 
 # ----------------------------------------------------------------------------
-# PYTHON ENVIRONMENT - pyenv
+# PYTHON ENVIRONMENT
 # ----------------------------------------------------------------------------
-if [[ -d "$HOME/.pyenv" ]]; then
-  export PYENV_ROOT="$HOME/.pyenv"
-  export PATH="$PYENV_ROOT/bin:$PATH"
-  eval "$(pyenv init -)"
-fi
-
 # Auto-activate VIRENS virtual environment (silent)
 if [[ "$AUTO_ACTIVATE_VENV" == "true" ]] && [[ -d "$VIRENS_FRAMEWORK/venv" ]] && [[ -z "$VIRTUAL_ENV" ]]; then
   source "$VIRENS_FRAMEWORK/venv/bin/activate" 2>/dev/null

@@ -12,15 +12,6 @@
 # ============================================================================
 
 # ============================================================================
-# PYTHON 3.13 PATH (For ML/AI Libraries)
-# ============================================================================
-# Python 3.13 required for: PyTorch, TensorFlow, transformers
-# Python 3.14 has compatibility issues with ML libraries on macOS
-if [[ -d "/Library/Frameworks/Python.framework/Versions/3.13" ]]; then
-  export PATH="/Library/Frameworks/Python.framework/Versions/3.13/bin:$PATH"
-fi
-
-# ============================================================================
 # HOMEBREW (Early initialization for PATH)
 # ============================================================================
 # Detect architecture and set Homebrew prefix
