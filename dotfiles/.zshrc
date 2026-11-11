@@ -118,6 +118,10 @@ if [[ -f "$VIRENS_CONFIG/paths.yaml" ]]; then
   # This is basic parsing - proper YAML parser would be better but adds dependency
   export OBSIDIAN_VAULT=$(grep '^obsidian_vault:' "$VIRENS_CONFIG/paths.yaml" | sed 's/obsidian_vault: *//' | tr -d '"' 2>/dev/null)
   export DEVONTHINK_DB=$(grep '^devonthink_database:' "$VIRENS_CONFIG/paths.yaml" | sed 's/devonthink_database: *//' | tr -d '"' 2>/dev/null)
+  # The values are read as text, so a leading ~ is expanded here, once;
+  # yq stays out (Michael, RULED 2026-11-11).
+  export OBSIDIAN_VAULT="${OBSIDIAN_VAULT/#\~/$HOME}"
+  export DEVONTHINK_DB="${DEVONTHINK_DB/#\~/$HOME}"
 else
   # Set defaults if config doesn't exist
   export OBSIDIAN_VAULT="$VIRENS_USER/obsidian-vault"
